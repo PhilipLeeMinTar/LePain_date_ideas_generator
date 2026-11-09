@@ -24,26 +24,61 @@ from .llm import GeminiLLM
 from .telegram import Telegram
 
 
+_ALL_UPDATES = ["message", "edited_message", "my_chat_member", "chat_member", "message_reaction"]
+
+
 def discover() -> None:
+    """Setup helper: diagnose the bot and print the group's chat id and topic (thread) ids."""
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     if not token:
         sys.exit("Set TELEGRAM_BOT_TOKEN first.")
-    data = requests.post(
-        f"https://api.telegram.org/bot{token}/getUpdates",
-        json={"timeout": 0, "allowed_updates": ["message"]}, timeout=30,
-    ).json()
-    if not data.get("ok"):
-        sys.exit(f"Telegram error: {data.get('description')}")
-    seen = set()
-    for u in data["result"]:
-        m = u.get("message") or {}
-        chat = m.get("chat") or {}
-        row = (chat.get("id"), chat.get("title"), m.get("message_thread_id"), (m.get("text") or "")[:40])
-        if row not in seen:
-            seen.add(row)
-            print(f"chat_id={row[0]}  chat={row[1]!r}  thread_id={row[2]}  text={row[3]!r}")
-    if not seen:
-        print("No messages yet. In your Date Ideas topic, send: /start@<your_bot_username>  then run this again.")
+
+    def call(method: str, payload: dict | None = None, timeout: int = 30):
+        data = requests.post(f"https://api.telegram.org/bot{token}/{method}", json=payload or {},
+                             timeout=timeout + 10).json()
+        if not data.get("ok"):
+            sys.exit(f"Telegram error on {method}: {data.get('description')}")
+        return data["result"]
+
+    me = call("getMe")
+    print(f"Bot: @{me['username']}  (reads all group messages: {me.get('can_read_all_group_messages')})")
+
+    hook = call("getWebhookInfo")
+    if hook.get("url"):
+        print(f"⚠️  A webhook is set ({hook['url']}). That blocks getUpdates, so removing it now.")
+        call("deleteWebhook", {"drop_pending_updates": False})
+
+    def show(updates) -> bool:
+        found = False
+        for u in updates:
+            kind = next((k for k in u if k != "update_id"), "?")
+            body = u.get(kind) or {}
+            chat = body.get("chat") or {}
+            line = f"[{kind}] chat_id={chat.get('id')}  chat={chat.get('title')!r}  type={chat.get('type')}"
+            if kind in ("message", "edited_message"):
+                line += f"  thread_id={body.get('message_thread_id')}  text={(body.get('text') or '')[:40]!r}"
+            elif kind == "my_chat_member":
+                line += f"  bot status: {body.get('old_chat_member', {}).get('status')} -> {body.get('new_chat_member', {}).get('status')}"
+            print(line)
+            found = True
+        return found
+
+    if show(call("getUpdates", {"timeout": 0, "allowed_updates": _ALL_UPDATES})):
+        print("\nUse chat_id (starts with -100) and the thread_id of a message sent in your Date Ideas topic.")
+        return
+
+    print(
+        "\nNo updates queued. Common causes: the bot joined the group AFTER your message, or Telegram\n"
+        "already dropped it (>24h). Waiting 60s now: send any message mentioning the bot in the Date Ideas\n"
+        f"topic, e.g.  /start@{me['username']}"
+    )
+    if show(call("getUpdates", {"timeout": 60, "allowed_updates": _ALL_UPDATES}, timeout=60)):
+        print("\nUse chat_id (starts with -100) and the thread_id of a message sent in your Date Ideas topic.")
+    else:
+        print(
+            "\nStill nothing. Check that the bot is actually a member of the group (Group info → Members).\n"
+            "If it is, remove it and add it back, make it an admin, then run this again."
+        )
 
 
 def main(argv: list[str] | None = None) -> None:
