@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from datetime import date
 from typing import Optional, Protocol
@@ -94,15 +95,54 @@ def _titles(events: list[Event]) -> str:
     return "\n".join(f"- {e.title} ({e.category or 'other'})" for e in events) or "(none yet)"
 
 
+class ModelUnavailable(RuntimeError):
+    """The configured Gemini model can't be used and no fallback was found. Fatal for the run."""
+
+
+_SKIP_MODEL_WORDS = ("image", "tts", "live", "audio", "embedding", "vision", "exp", "learnlm", "computer")
+
+
+def pick_flash_model(names: list[str]) -> str | None:
+    """Choose the best general-purpose Flash model from a ListModels result.
+
+    Prefers stable over preview, full Flash over Flash-Lite, and higher version numbers.
+    """
+    def version(n: str) -> tuple[int, ...]:
+        m = re.search(r"gemini-(\d+(?:\.\d+)*)", n)
+        return tuple(int(x) for x in m.group(1).split(".")) if m else (0,)
+
+    cands = [
+        n.removeprefix("models/") for n in names
+        if "flash" in n and "gemini" in n and not any(w in n for w in _SKIP_MODEL_WORDS)
+    ]
+    if not cands:
+        return None
+    return max(cands, key=lambda n: ("preview" not in n, "lite" not in n, "latest" not in n, version(n)))
+
+
 class GeminiLLM:
     def __init__(self, api_key: str, model: str, min_interval_s: float = 6.0):
         from google import genai  # imported lazily so tests don't need the SDK configured
+        from google.genai import types
 
-        self._genai = genai
-        self.client = genai.Client(api_key=api_key)
+        # The SDK defaults to the stable "v1" API, which lacks aliases like gemini-flash-latest
+        # and structured-output features. v1beta has both.
+        self.client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version="v1beta"))
         self.model = model
         self.min_interval_s = min_interval_s  # free tier has low requests-per-minute limits
         self._last = 0.0
+        self._fallback_tried = False
+
+    def _fallback_model(self) -> str | None:
+        try:
+            names = [
+                m.name for m in self.client.models.list()
+                if not getattr(m, "supported_actions", None) or "generateContent" in m.supported_actions
+            ]
+        except Exception as e:  # noqa: BLE001
+            log.error("Could not list Gemini models: %s", e)
+            return None
+        return pick_flash_model(names)
 
     def _generate(self, prompt: str, schema):
         from google.genai import errors, types
@@ -121,9 +161,24 @@ class GeminiLLM:
                     return resp.parsed
                 return json.loads(resp.text or "[]")
             except errors.APIError as e:
-                if getattr(e, "code", None) in (429, 500, 503) and attempt < 3:
+                code = getattr(e, "code", None)
+                if code == 404:
+                    if not self._fallback_tried:
+                        self._fallback_tried = True
+                        alt = self._fallback_model()
+                        if alt and alt != self.model:
+                            log.warning("Gemini model %r not found; switching to %r", self.model, alt)
+                            self.model = alt
+                            continue
+                    raise ModelUnavailable(
+                        f"Gemini model {self.model!r} is not available for this API key. "
+                        "Set the GEMINI_MODEL repo variable to a model listed in Google AI Studio."
+                    ) from e
+                if code in (401, 403):
+                    raise ModelUnavailable(f"Gemini rejected the API key ({code}): {e}") from e
+                if code in (429, 500, 503) and attempt < 3:
                     delay = 20 * (attempt + 1)
-                    log.warning("Gemini %s, retrying in %ss", e.code, delay)
+                    log.warning("Gemini %s, retrying in %ss", code, delay)
                     time.sleep(delay)
                     continue
                 raise

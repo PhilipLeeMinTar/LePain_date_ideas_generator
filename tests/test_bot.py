@@ -200,3 +200,81 @@ def test_monthly_with_nothing_found():
     ctx = make_ctx(date(2026, 11, 25), {"Src": []}, pick_all=False)
     jobs.monthly(ctx)
     assert len(ctx.tg.sent) == 1 and "couldn't find" in ctx.tg.sent[0]
+
+
+# ------------------------------------------------------------------ resilience
+from bot.llm import GeminiLLM, ModelUnavailable, pick_flash_model
+
+
+def test_pick_flash_model_prefers_stable_full_flash_newest():
+    names = [
+        "models/gemini-2.5-flash", "models/gemini-3.5-flash", "models/gemini-3.6-flash-preview",
+        "models/gemini-3.1-flash-lite", "models/gemini-3.5-flash-image", "models/gemini-3.1-pro-preview",
+        "models/gemini-2.5-flash-native-audio-preview", "models/text-embedding-004",
+    ]
+    assert pick_flash_model(names) == "gemini-3.5-flash"
+    assert pick_flash_model(["models/gemini-3.1-pro"]) is None
+
+
+class _ExplodingLLM(FakeLLM):
+    def __init__(self, exc):
+        super().__init__({})
+        self.exc = exc
+
+    def extract(self, page_text, source, today):
+        raise self.exc
+
+
+def test_refresh_fails_loudly_when_every_source_fails():
+    ctx = make_ctx(date(2026, 11, 25), {})
+    ctx.llm = _ExplodingLLM(ValueError("boom"))
+    with pytest.raises(RuntimeError, match="No source could be processed"):
+        jobs.monthly(ctx)
+    assert ctx.tg.sent == []  # never posts a misleading "nothing found"
+
+
+def test_model_unavailable_stops_immediately():
+    ctx = make_ctx(date(2026, 11, 25), {})
+    ctx.sources = [Source("A", "https://a"), Source("B", "https://b")]
+    llm = _ExplodingLLM(ModelUnavailable("bad model"))
+    calls = []
+    orig = llm.extract
+    llm.extract = lambda *a: (calls.append(1), orig(*a))
+    ctx.llm = llm
+    with pytest.raises(ModelUnavailable):
+        jobs.monthly(ctx)
+    assert len(calls) == 1
+
+
+def test_gemini_404_falls_back_to_listed_model(monkeypatch):
+    from google.genai import errors
+
+    class Resp:
+        parsed = [{"key": "k1", "why": "great"}]
+        text = None
+
+    class Models:
+        def __init__(self):
+            self.used = []
+
+        def generate_content(self, model, contents, config):
+            self.used.append(model)
+            if model == "gemini-flash-latest":
+                raise errors.ClientError(404, {"error": {"code": 404, "message": "not found", "status": "NOT_FOUND"}})
+            return Resp()
+
+        def list(self):
+            class M:
+                def __init__(self, n):
+                    self.name, self.supported_actions = n, ["generateContent"]
+            return [M("models/gemini-3.5-flash"), M("models/gemini-3.1-flash-lite")]
+
+    llm = GeminiLLM("fake-key", "gemini-flash-latest", min_interval_s=0)
+    class FakeClient:
+        models = Models()
+
+    llm.client = FakeClient()
+    picks = llm.rank([Event(title="X", start_date="2026-12-01", key="k1")], "p", [], [], 5, 1, "ctx")
+    assert picks == [("k1", "great")]
+    assert llm.model == "gemini-3.5-flash"
+    assert llm.client.models.used == ["gemini-flash-latest", "gemini-3.5-flash"]

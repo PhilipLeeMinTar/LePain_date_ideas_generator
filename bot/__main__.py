@@ -90,7 +90,8 @@ def main(argv: list[str] | None = None) -> None:
     args = p.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    for noisy in ("httpx", "httpx2", "google_genai", "google_genai.models"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)
 
     if args.job == "discover":
         discover()

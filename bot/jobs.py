@@ -12,7 +12,7 @@ from .dates import (
     month_label, month_start, monthly_target_month, next_month, parse_iso, weekly_target_months,
 )
 from .db import DB, Event, event_key
-from .llm import CATEGORIES, LLM
+from .llm import CATEGORIES, LLM, ModelUnavailable
 from .scrape import fetch, html_to_text
 from .sources import SOURCES, Source, expand
 from .telegram import Telegram
@@ -51,16 +51,21 @@ def _clean(ev: Event, today: date) -> Event | None:
 def refresh(ctx: Ctx, months: list[date]) -> int:
     """Scrape every source, extract events, store them. Returns number of new events."""
     new_total = 0
+    attempted = succeeded = 0
     for name, url in expand(ctx.sources, months):
         html = ctx.fetch(url)
         if not html:
             log.warning("[%s] no page content, skipping", name)
             continue
+        attempted += 1
         try:
             extracted = ctx.llm.extract(html_to_text(html, url), name, ctx.today)
-        except Exception:
-            log.exception("[%s] extraction failed", name)
+        except ModelUnavailable:
+            raise  # config problem: stop now instead of failing every source the same way
+        except Exception as e:  # noqa: BLE001
+            log.error("[%s] extraction failed: %s: %s", name, type(e).__name__, e)
             continue
+        succeeded += 1
         kept = new = 0
         for ev in extracted:
             ev = _clean(ev, ctx.today)
@@ -71,6 +76,9 @@ def refresh(ctx: Ctx, months: list[date]) -> int:
         ctx.db.commit()
         log.info("[%s] %d extracted, %d kept, %d new", name, len(extracted), kept, new)
         new_total += new
+    if succeeded == 0:
+        # Don't let a broken run post "nothing found": fail loudly so GitHub emails you.
+        raise RuntimeError(f"No source could be processed ({attempted} fetched, 0 extracted). See errors above.")
     return new_total
 
 
