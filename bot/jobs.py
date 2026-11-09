@@ -118,11 +118,13 @@ def collect_reactions(ctx: Ctx) -> int:
     return count
 
 
-def _post_picks(ctx: Ctx, candidates: list[Event], picks: list[tuple[str, str]]) -> None:
+def _post_digest(ctx: Ctx, header: str, candidates: list[Event], picks: list[tuple[str, str]]) -> None:
     by_key = {e.key: e for e in candidates}
-    for key, why in picks:
-        msg_id = ctx.tg.send(fmt.event_message(by_key[key], why))
-        ctx.db.mark_posted(key, msg_id)
+    for text, events in fmt.digest(header, [by_key[key] for key, _ in picks]):
+        ctx.tg.send(text)
+        for e in events:
+            # No message id: a reaction on a combined message says nothing about any one event.
+            ctx.db.mark_posted(e.key, None)
         ctx.db.commit()  # commit per post so a crash never causes double posting
 
 
@@ -139,8 +141,7 @@ def monthly(ctx: Ctx, month: date | None = None) -> None:
         context=f"Build their monthly lineup of date ideas for {month_label(month)}.",
     )
     if picks:
-        ctx.tg.send(fmt.monthly_header(month, len(picks)))
-        _post_picks(ctx, candidates, picks)
+        _post_digest(ctx, fmt.monthly_header(month), candidates, picks)
     else:
         ctx.tg.send(f"📆 <b>Date ideas for {month_label(month)}</b>\nI couldn't find anything good yet. I'll keep looking every week.")
     ctx.db.mark_reviewed([e.key for e in candidates])
@@ -166,8 +167,7 @@ def weekly(ctx: Ctx) -> None:
         ),
     )
     if picks:
-        ctx.tg.send(fmt.weekly_header(len(picks)))
-        _post_picks(ctx, candidates, picks)
+        _post_digest(ctx, fmt.weekly_header(len(picks)), candidates, picks)
     else:
         ctx.tg.send(fmt.nothing_new())
     ctx.db.mark_reviewed([e.key for e in candidates])

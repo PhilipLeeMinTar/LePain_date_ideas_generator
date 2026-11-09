@@ -105,14 +105,31 @@ def test_html_to_text_keeps_links_and_jsonld():
 
 
 # ------------------------------------------------------------------ formatting
-def test_event_message_escapes_html():
+def test_digest_shows_only_name_date_and_link():
     e = Event(title="Rock & <Roll>", start_date="2026-12-12", time="8pm", venue="Esplanade",
               price="From $48", ticket_sale="2026-11-20 10:00", category="music", url="https://x.com/?a=1&b=2")
-    msg = fmt.event_message(e, "Live music you'd love")
-    assert "Rock &amp; &lt;Roll&gt;" in msg
+    [(msg, events)] = fmt.digest("Header", [e])
+    assert events == [e]
+    assert "1. <b>Rock &amp; &lt;Roll&gt;</b>" in msg
     assert "Sat 12 Dec, 8pm" in msg
-    assert "Ticket sale: Fri 20 Nov, 10am" in msg
     assert 'href="https://x.com/?a=1&amp;b=2"' in msg
+    assert "Esplanade" not in msg and "$48" not in msg and "Ticket" not in msg
+
+
+def test_digest_is_in_date_order_and_handles_missing_link():
+    later = Event(title="Later", start_date="2026-12-20")
+    sooner = Event(title="Sooner", start_date="2026-12-01")
+    [(msg, _)] = fmt.digest("Header", [later, sooner])
+    assert msg.index("1. <b>Sooner") < msg.index("2. <b>Later") and "Details" not in msg
+
+
+def test_digest_splits_very_long_lists_without_losing_events():
+    events = [Event(title=f"Concert {i} " + "x" * 300, start_date="2026-12-01", url="https://x.com/" + "y" * 200)
+              for i in range(15)]
+    parts = fmt.digest("Header", events)
+    assert len(parts) > 1 and all(len(text) <= 4096 for text, _ in parts)
+    assert sum(len(chunk) for _, chunk in parts) == 15
+    assert parts[0][0].startswith("Header") and not parts[1][0].startswith("Header")
 
 
 def test_date_range_formats():
@@ -140,8 +157,10 @@ def test_monthly_posts_header_and_picks_then_weekly_skips_them():
     ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
     jobs.monthly(ctx)
     sent = ctx.tg.sent
+    assert len(sent) == 1  # one combined message
     assert "Date ideas for December 2026" in sent[0]
-    assert len(sent) == 3  # header + 2 December events (past + March excluded)
+    assert "Hawker Feast Festival" in sent[0] and "Indie Gig" in sent[0]  # past + March excluded
+    assert "Far Concert" not in sent[0] and "Old Event" not in sent[0]
     assert ctx.db.conn.execute("SELECT COUNT(*) FROM events WHERE posted_at IS NOT NULL").fetchone()[0] == 2
 
     # Next Monday (30 Nov): nothing new for Nov/Dec -> "nothing new"
@@ -158,8 +177,8 @@ def test_weekly_posts_only_newly_found_events():
     ctx.today = date(2026, 11, 30)
     ctx.tg.sent.clear()
     jobs.weekly(ctx)
-    assert "1 new pick" in ctx.tg.sent[0]
-    assert "New Supper Club" in ctx.tg.sent[1] and len(ctx.tg.sent) == 2
+    assert len(ctx.tg.sent) == 1
+    assert "1 new pick" in ctx.tg.sent[0] and "New Supper Club" in ctx.tg.sent[0]
 
 
 def test_weekly_skips_on_25th():
@@ -188,13 +207,27 @@ def test_reactions_feed_into_ranking():
                                                "user": {"id": 8}, "new_reaction": [{"type": "emoji", "emoji": "👎"}]}},
     ]
     ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
-    jobs.monthly(ctx)  # posts header (1001) + two events (1002, 1003)
+    jobs.monthly(ctx)
+    # Events posted before combined messages each have their own message, and still count.
+    ctx.db.mark_posted(event_key("Hawker Feast Festival", "2026-12-05"), 1002)
+    ctx.db.mark_posted(event_key("Indie Gig", "2026-12-12"), 1003)
     ctx.tg.updates = updates
     jobs.collect_reactions(ctx)
     liked, disliked = ctx.db.feedback()
     assert [e.title for e in liked] == ["Hawker Feast Festival"]
     assert [e.title for e in disliked] == ["Indie Gig"]
     assert ctx.db.get_meta("update_offset") == "8"
+
+
+def test_reaction_on_a_combined_message_likes_nothing():
+    ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
+    jobs.monthly(ctx)  # the combined message gets id 1001
+    ctx.tg.updates = [{"update_id": 5, "message_reaction": {
+        "chat": {"id": -100123}, "message_id": 1001, "user": {"id": 7},
+        "new_reaction": [{"type": "emoji", "emoji": "👍"}],
+    }}]
+    jobs.collect_reactions(ctx)
+    assert ctx.db.feedback() == ([], [])
 
 
 def test_monthly_with_nothing_found():

@@ -4,11 +4,11 @@ A Telegram bot that posts Singapore date ideas (events, live music, food happeni
 
 | Job | When (SGT) | What it posts |
 |---|---|---|
-| Monthly | 25th, 7pm | Top 10–15 picks for **next** month, one message per event |
+| Monthly | 25th, 7pm | Top 10–15 picks for **next** month, in one combined message |
 | Weekly | Mondays, 7pm | Newly announced picks (current month, plus next month after the 25th), or "nothing new this week" |
 | Daily | 9am | Usually nothing. Saves 👍/👎 reactions, and posts 🎟️ alerts for ticket sales of events in later months |
 
-React 👍 / 👎 (or ❤️ 🔥 / 💩 etc.) on event messages. The bot uses them to pick better next time.
+Picks are based on `taste_profile.md`, so edit that file to steer them. Reactions only count on older posts that had one event per message.
 
 ## How it works
 

@@ -160,7 +160,7 @@ class DB:
             [(ts, k) for k in keys],
         )
 
-    def mark_posted(self, key: str, message_id: int) -> None:
+    def mark_posted(self, key: str, message_id: int | None) -> None:
         self.conn.execute(
             "UPDATE events SET posted_at = ?, message_id = ?, reviewed_at = COALESCE(reviewed_at, ?) WHERE key = ?",
             (now_iso(), message_id, now_iso(), key),

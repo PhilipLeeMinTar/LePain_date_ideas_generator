@@ -7,12 +7,6 @@ from html import escape
 from .dates import month_label, parse_iso
 from .db import Event
 
-EMOJI = {
-    "food": "🍽️", "music": "🎵", "arts": "🎨", "outdoors": "🌿", "nightlife": "🌙",
-    "workshop": "🛠️", "festival": "🎪", "market": "🛍️", "comedy": "😂", "other": "✨",
-}
-
-
 def _fmt_day(d: date) -> str:
     return f"{d.strftime('%a')} {d.day} {d.strftime('%b')}"
 
@@ -39,28 +33,31 @@ def fmt_ticket_sale(raw: str) -> str:
         return escape(raw)
 
 
-def event_message(e: Event, why: str | None) -> str:
-    icon = EMOJI.get((e.category or "other").lower(), "✨")
-    when = fmt_date_range(e.start_date, e.end_date)
-    if e.time:
-        when += f", {escape(e.time)}"
-    lines = [f"{icon} <b>{escape(e.title)}</b>", f"📅 {when}" + (f" · 📍 {escape(e.venue)}" if e.venue else "")]
-    if e.price:
-        lines.append(f"💰 {escape(e.price)}")
-    if e.ticket_sale:
-        lines.append(f"🎟️ Ticket sale: {fmt_ticket_sale(e.ticket_sale)}")
-    if why:
-        lines.append(f"<i>{escape(why)}</i>")
-    if e.url:
-        lines.append(f'🔗 <a href="{escape(e.url, quote=True)}">Details</a>')
-    return "\n".join(lines)
+def digest(header: str, events: list[Event]) -> list[tuple[str, list[Event]]]:
+    """Events in date order as one message: (text, events in it) pairs.
+
+    Normally a single pair. A very long list is split to respect Telegram's length limit.
+    """
+    out: list[tuple[str, list[Event]]] = []
+    text, chunk = header + "\n", []
+    for i, e in enumerate(sorted(events, key=lambda ev: ev.start_date), 1):
+        when = fmt_date_range(e.start_date, e.end_date)
+        if e.time:
+            when += f", {escape(e.time)}"
+        item = f"\n{i}. <b>{escape(e.title)}</b>\n    {when}"
+        if e.url:
+            item += f' · <a href="{escape(e.url, quote=True)}">Details</a>'
+        if chunk and len(text) + len(item) > 3900:
+            out.append((text.strip(), chunk))
+            text, chunk = "", []
+        text += item
+        chunk.append(e)
+    out.append((text.strip(), chunk))
+    return out
 
 
-def monthly_header(month: date, count: int) -> str:
-    return (
-        f"📆 <b>Date ideas for {month_label(month)}</b>\n"
-        f"{count} picks for you two. React 👍 or 👎 on each so I learn what you like."
-    )
+def monthly_header(month: date) -> str:
+    return f"📆 <b>Date ideas for {month_label(month)}</b>"
 
 
 def weekly_header(count: int) -> str:

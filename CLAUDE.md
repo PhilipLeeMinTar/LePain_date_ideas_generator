@@ -21,7 +21,7 @@ It is **broadcast-only** and runs entirely on **GitHub Actions cron jobs**. The 
 
 | Job | When | Behaviour |
 |---|---|---|
-| `monthly` | 25th, 7pm | Top 10–15 picks for **next** month: a header message, then one message per event |
+| `monthly` | 25th, 7pm | Top 10–15 picks for **next** month, as one combined message (name, date/time, link) |
 | `weekly` | Mondays, 7pm | Newly found events for the current month (plus next month from the 25th onward). Max 5. Posts "nothing new this week" if there are none. Skips the 25th |
 | `daily` | 9am | Collects reactions (Telegram keeps updates ~24h), refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once |
 
@@ -55,7 +55,8 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 ## Failure behaviour (intentional)
 
 - If every source fails extraction, `refresh()` raises, the run fails, and GitHub emails the owner. **Never** post a misleading "nothing found" message on errors.
-- The workflow saves `data/bot.db` with `if: always()` (except on dry runs), and `_post_picks` commits after every message, so a crash never causes double posting.
+- The workflow saves `data/bot.db` with `if: always()` (except on dry runs), and `_post_digest` commits after every message, so a crash never causes double posting.
+- Combined messages store no `message_id` on their events, so a reaction on one can't count as liking every event in it. Only reactions on the older one-event-per-message posts feed the ranker. New picks rely on `taste_profile.md`.
 - Dry runs work on a temp copy of the DB and print messages instead of sending them.
 
 ## GitHub setup
