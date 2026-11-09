@@ -5,7 +5,7 @@ Context for Claude Code working on this repo.
 ## What this is
 
 A Telegram bot that posts Singapore date ideas (events, live music, food happenings) for a couple (the owner and his girlfriend) into the **Date Ideas** topic of their private Telegram group.
-It is **broadcast-only** and runs entirely on **GitHub Actions cron jobs**. The goal is to keep it **free**.
+Scheduled posts run on **GitHub Actions cron jobs**, and the `/idea` command runs on a **Cloudflare Worker** (`worker/`, JavaScript). The goal is to keep it **free**.
 
 - Bot: `@lepain_date_ideas_generator_bot`
 - Group: supergroup with topics. Date Ideas topic `thread_id = 7`. The chat id is stored in the `TELEGRAM_CHAT_ID` secret.
@@ -23,9 +23,9 @@ It is **broadcast-only** and runs entirely on **GitHub Actions cron jobs**. The 
 |---|---|---|
 | `monthly` | 25th, 7pm | Top 10–15 picks for **next** month, as one combined message (name, date/time, link) |
 | `weekly` | Mondays, 7pm | Newly found events for the current month (plus next month from the 25th onward). Max 5. Posts "nothing new this week" if there are none. Skips the 25th |
-| `daily` | 9am | Collects reactions (Telegram keeps updates ~24h), refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once |
+| `daily` | 9am | Refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once |
 
-`status` is manual-only: it posts a database and Gemini usage summary.
+`status` is manual-only: it posts a database and Gemini usage summary. `/idea <request>` is typed in the group and answered by the Worker.
 
 New posts are always new messages. Existing messages are never edited (the owner's choice). The owner asked for one combined message per digest, because one message per event felt like spam.
 
@@ -38,9 +38,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 ```
 
 - `bot/__main__.py`: CLI. `python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids) and `python -m bot status` (manual-only database summary with no Gemini calls; in the workflow it ignores `dry_run` and always posts).
-- `bot/jobs.py`: the three scheduled jobs and `status`, plus `refresh()` and `collect_reactions()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
+- `bot/jobs.py`: the three scheduled jobs and `status`, plus `refresh()` and `export_events()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
   - `refresh()` remembers each source that succeeded today (`scraped:<url>` in `meta`), so reruns and the evening digests skip them. Pages that are down, blocked or almost empty (under `MIN_PAGE_CHARS`) are skipped before any Gemini request.
-- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `gemini_usage`, `meta` (stores `update_offset`, `scraped:<url>` and learned `gemini_daily_limit:<model>` values).
+- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `gemini_usage`, `meta` (stores `scraped:<url>` and learned `gemini_daily_limit:<model>` values).
   - Event key = sha1 of the normalized title (years and filler words stripped) plus start date.
   - Upserts only fill in missing fields.
   - An event moves through `reviewed_at` → `posted_at`/`message_id`. "Reviewed" means a digest already considered it, so the weekly job only looks at genuinely new events.
@@ -52,7 +52,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   - Requests are paced at ~6s for the free tier, with retries on 429/5xx and dropped connections. An exhausted daily quota skips the retries and goes straight to a backup.
   - The free tier allowed 20 requests per day for `gemini-3.8-flash` when last hit. The quota day runs on Pacific time.
   - Dropped connections are matched by exception class name, because the SDK's HTTP library (`httpx2` in 3.0) varies by version.
-- `bot/telegram.py`: minimal Bot API client. Never log URLs, because they contain the token.
+- `bot/telegram.py`: minimal Bot API client, send only. Never log URLs, because they contain the token.
+- `worker/`: Cloudflare Worker for `/idea`. It checks the webhook secret header and the chat id, reads `data/events.json` and `taste_profile.md` from GitHub raw, asks Gemini (Flash-Lite, then Flash as backup), and replies in the same topic. It must finish within about 30 seconds of `waitUntil`, and picks are indexes into stored events so it can't invent a link. Tests: `node --test` in `worker/`. Pushing doesn't deploy it: run `npx wrangler deploy` from `worker/`.
+- `data/events.json`: upcoming events, exported after every non-dry job (also on failure) and committed with the DB.
 - `bot/formatting.py`: HTML parse mode, so always `html.escape` text. Digests show only name, date/time and link, sorted by date. Long digests and ticket alerts are split to stay under the 4096-character limit.
 - `taste_profile.md`: plain-English preferences the ranker reads. **Love:** good food, cool live music. **Open to:** arts (stand-out items only), experiences. **Not really:** nightlife (for now), kids/business/expos/sales.
 
@@ -60,7 +62,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 - If every source fails extraction, `refresh()` raises, the run fails, and GitHub emails the owner. **Never** post a misleading "nothing found" message on errors.
 - The workflow saves `data/bot.db` with `if: always()` (except on dry runs), and `_post_digest` commits after every message, so a crash never causes double posting.
-- Combined messages store no `message_id` on their events, so a reaction on one can't count as liking every event in it. Only reactions on the older one-event-per-message posts feed the ranker. New picks rely on `taste_profile.md`.
+- Reactions are no longer collected (the owner's choice). Reactions already saved from the older one-event-per-message posts still feed the ranker. Combined messages store no `message_id`. New picks rely on `taste_profile.md`.
 - Dry runs work on a temp copy of the DB and print messages instead of sending them.
 
 ## GitHub setup
@@ -71,7 +73,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 - To pause: `gh workflow disable bot.yml`, which also blocks manual runs. `gh workflow enable bot.yml` resumes.
 - The job timeout is 60 minutes.
 - A concurrency group serialises runs, since they share the SQLite file.
-- The bot must be a **group admin** to receive `message_reaction` updates. **Never set a webhook**: the bot relies on `getUpdates`.
+- The bot must be a **group admin** so the webhook receives group commands.
+- **The webhook and `getUpdates` are mutually exclusive.** Nothing in the scheduled jobs may call `getUpdates`, and `discover` exits rather than delete the webhook.
+- Worker secrets (set with `wrangler secret put`): `TELEGRAM_BOT_TOKEN`, `GEMINI_API_KEY`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
 
 ## Sources notes
 
@@ -82,12 +86,12 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 ## Status (2026-11-09)
 
-- Phase 1 is live. November's lineup was posted on 2026-11-09 as 13 separate messages, before the switch to combined messages. 33 tests pass (`pytest` isn't in `requirements.txt`, so install it separately).
+- Phase 1 is live. November's lineup was posted on 2026-11-09 as 13 separate messages, before the switch to combined messages. 36 Python tests and 15 Worker tests pass (`pytest` isn't in `requirements.txt`, so install it separately).
 - Not yet seen in production: a combined digest in Telegram, and the backup model switch (covered by tests only).
-- **Next:** check the first combined digest, then watch whether the daily schedule stays within the Gemini quota.
+- Phase 2 (`/idea`) code is written and covered by tests with fake network calls. It has not yet been deployed, and the webhook is not set unless Status is updated to say so. Order matters: push the removal of `getUpdates` before setting the webhook.
+- **Next:** deploy `/idea`, check the first combined digest, then watch whether the daily schedule stays within the Gemini quota.
 
 ## Roadmap (agreed, not started)
 
-- Phase 2: on-demand `/idea` command, e.g. "rainy, under $50, tonight". Needs an always-on free host (e.g. Cloudflare Workers webhook). Note that this conflicts with `getUpdates`, so reaction collection would need to move to the webhook.
 - Phase 3: food feed (new openings, places to try) posted to the group's separate **Food** topic by the same bot, as a separate feed config. Dated food events stay in Date Ideas.
 - A counsellor bot for the same group was discussed but is on hold.

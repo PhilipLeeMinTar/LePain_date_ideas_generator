@@ -56,12 +56,3 @@ class Telegram:
         msg = self._call("sendMessage", payload)
         time.sleep(1)  # stay well under group rate limits
         return int(msg["message_id"])
-
-    def get_updates(self, offset: int | None) -> list[dict[str, Any]]:
-        """Fetch queued updates (reactions). Telegram keeps them ~24h."""
-        if self.dry_run:
-            return []
-        payload: dict[str, Any] = {"timeout": 0, "allowed_updates": ["message_reaction"]}
-        if offset is not None:
-            payload["offset"] = offset
-        return self._call("getUpdates", payload)

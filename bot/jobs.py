@@ -1,9 +1,11 @@
 """The three scheduled jobs: monthly lineup, weekly update, daily housekeeping."""
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import date, timedelta
+from pathlib import Path
 from typing import Callable
 
 from . import formatting as fmt
@@ -30,7 +32,6 @@ class Ctx:
     llm: LLM
     today: date
     profile: str
-    chat_id: str
     fetch: Callable[[str], str | None] = fetch
     sources: list[Source] = field(default_factory=lambda: list(SOURCES))
     min_page_chars: int = MIN_PAGE_CHARS
@@ -100,24 +101,6 @@ def refresh(ctx: Ctx, months: list[date]) -> int:
     return new_total
 
 
-def collect_reactions(ctx: Ctx) -> int:
-    offset = ctx.db.get_meta("update_offset")
-    updates = ctx.tg.get_updates(int(offset) if offset else None)
-    count = 0
-    for u in updates:
-        r = u.get("message_reaction")
-        if r and str(r.get("chat", {}).get("id")) == str(ctx.chat_id):
-            user_id = (r.get("user") or r.get("actor_chat") or {}).get("id", 0)
-            emojis = [x["emoji"] for x in r.get("new_reaction", []) if x.get("type") == "emoji"]
-            ctx.db.set_reactions(int(r["message_id"]), int(user_id), emojis)
-            count += 1
-    if updates:
-        ctx.db.set_meta("update_offset", str(max(u["update_id"] for u in updates) + 1))
-    ctx.db.commit()
-    log.info("collected %d reaction updates", count)
-    return count
-
-
 def _post_digest(ctx: Ctx, header: str, candidates: list[Event], picks: list[tuple[str, str]]) -> None:
     by_key = {e.key: e for e in candidates}
     for text, events in fmt.digest(header, [by_key[key] for key, _ in picks]):
@@ -131,7 +114,6 @@ def _post_digest(ctx: Ctx, header: str, candidates: list[Event], picks: list[tup
 # ---------------------------------------------------------------- jobs
 def monthly(ctx: Ctx, month: date | None = None) -> None:
     month = month_start(month) if month else monthly_target_month(ctx.today)
-    collect_reactions(ctx)
     refresh(ctx, [month])
     candidates = ctx.db.unreviewed_in_months([month])
     liked, disliked = ctx.db.feedback()
@@ -153,7 +135,6 @@ def weekly(ctx: Ctx) -> None:
         log.info("25th: the monthly lineup goes out today, skipping the weekly update")
         return
     months = weekly_target_months(ctx.today)
-    collect_reactions(ctx)
     refresh(ctx, months)
     candidates = ctx.db.unreviewed_in_months(months)
     liked, disliked = ctx.db.feedback()
@@ -175,7 +156,6 @@ def weekly(ctx: Ctx) -> None:
 
 
 def daily(ctx: Ctx) -> None:
-    collect_reactions(ctx)
     refresh(ctx, [month_start(ctx.today), next_month(ctx.today)])
     alerts = ctx.db.upcoming_ticket_sales(ctx.today, exclude_months=weekly_target_months(ctx.today))
     log.info("daily: %d new ticket sale alerts", len(alerts))
@@ -192,3 +172,12 @@ def status(db: DB, tg: Telegram, today: date) -> None:
         db.stats(today), db.upcoming(today, posted=True), db.upcoming(today, posted=False), today,
         db.gemini_usage(gemini_day()), gemini_reset_time(),
     ))
+
+
+def export_events(db: DB, today: date, path: Path) -> None:
+    """Write upcoming events as JSON for the /idea Worker, which can't read SQLite."""
+    fields = ("title", "start_date", "end_date", "time", "venue", "price", "category", "url", "summary")
+    events = db.upcoming_all(today)
+    data = [{f: getattr(e, f) for f in fields} for e in events]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    log.info("exported %d upcoming events", len(data))

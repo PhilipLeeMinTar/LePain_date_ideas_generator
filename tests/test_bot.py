@@ -12,17 +12,12 @@ from bot.sources import Source, expand
 
 # ------------------------------------------------------------------ fakes
 class FakeTG:
-    def __init__(self, updates=None):
+    def __init__(self):
         self.sent: list[str] = []
-        self.updates = updates or []
 
     def send(self, html: str) -> int:
         self.sent.append(html)
         return 1000 + len(self.sent)
-
-    def get_updates(self, offset):
-        out, self.updates = self.updates, []
-        return out
 
 
 class FakeLLM:
@@ -48,7 +43,6 @@ def make_ctx(today, events_by_source, tg=None, pick_all=True):
         llm=FakeLLM(events_by_source, pick_all),
         today=today,
         profile="food and live music",
-        chat_id="-100123",
         fetch=lambda url: "<html><body>events</body></html>",
         sources=[Source("Src", "https://example.com/{month_name}")],
         min_page_chars=0,
@@ -197,37 +191,73 @@ def test_daily_sends_ticket_alert_once_for_future_month():
     assert ctx.tg.sent == []  # not repeated
 
 
-def test_reactions_feed_into_ranking():
-    updates = [
-        {"update_id": 5, "message_reaction": {"chat": {"id": -100123}, "message_id": 1002,
-                                               "user": {"id": 7}, "new_reaction": [{"type": "emoji", "emoji": "👍"}]}},
-        {"update_id": 6, "message_reaction": {"chat": {"id": -100123}, "message_id": 1003,
-                                               "user": {"id": 7}, "new_reaction": [{"type": "emoji", "emoji": "👎"}]}},
-        {"update_id": 7, "message_reaction": {"chat": {"id": -999}, "message_id": 1002,
-                                               "user": {"id": 8}, "new_reaction": [{"type": "emoji", "emoji": "👎"}]}},
-    ]
+def _add_reaction(db, message_id, user_id, emoji):
+    db.conn.execute("INSERT INTO reactions VALUES (?, ?, ?, '2026-11-09T09:00:00+08:00')",
+                    (message_id, user_id, emoji))
+
+
+def test_saved_reactions_on_older_posts_feed_into_ranking():
     ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
     jobs.monthly(ctx)
     # Events posted before combined messages each have their own message, and still count.
     ctx.db.mark_posted(event_key("Hawker Feast Festival", "2026-12-05"), 1002)
     ctx.db.mark_posted(event_key("Indie Gig", "2026-12-12"), 1003)
-    ctx.tg.updates = updates
-    jobs.collect_reactions(ctx)
+    _add_reaction(ctx.db, 1002, 7, "👍")
+    _add_reaction(ctx.db, 1003, 7, "👎")
     liked, disliked = ctx.db.feedback()
     assert [e.title for e in liked] == ["Hawker Feast Festival"]
     assert [e.title for e in disliked] == ["Indie Gig"]
-    assert ctx.db.get_meta("update_offset") == "8"
 
 
-def test_reaction_on_a_combined_message_likes_nothing():
+def test_events_in_a_combined_message_have_no_message_id():
     ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
-    jobs.monthly(ctx)  # the combined message gets id 1001
-    ctx.tg.updates = [{"update_id": 5, "message_reaction": {
-        "chat": {"id": -100123}, "message_id": 1001, "user": {"id": 7},
-        "new_reaction": [{"type": "emoji", "emoji": "👍"}],
-    }}]
-    jobs.collect_reactions(ctx)
+    jobs.monthly(ctx)
+    posted = ctx.db.conn.execute("SELECT message_id FROM events WHERE posted_at IS NOT NULL").fetchall()
+    assert posted and all(r["message_id"] is None for r in posted)
     assert ctx.db.feedback() == ([], [])
+
+
+def test_jobs_never_call_getupdates():
+    # A webhook makes getUpdates fail, so nothing may depend on it.
+    assert not hasattr(jobs, "collect_reactions") and not hasattr(jobs.Telegram, "get_updates")
+
+
+def test_export_events_keeps_only_upcoming_events(tmp_path):
+    import json
+
+    db = DB(":memory:")
+    db.upsert_event(Event(title="Over", start_date="2026-10-01", url="https://old"))
+    db.upsert_event(Event(title="Running", start_date="2026-10-01", end_date="2026-12-01"))
+    db.upsert_event(Event(title="Soon", start_date="2026-11-20", price="$10", url="https://soon"))
+    path = tmp_path / "events.json"
+    jobs.export_events(db, date(2026, 11, 9), path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert [e["title"] for e in data] == ["Running", "Soon"]
+    assert data[1]["price"] == "$10" and data[1]["url"] == "https://soon" and "key" not in data[1]
+
+
+def test_discover_leaves_an_existing_webhook_alone(monkeypatch):
+    import bot.__main__ as cli
+
+    calls = []
+
+    class Resp:
+        def __init__(self, result):
+            self.result = result
+
+        def json(self):
+            return {"ok": True, "result": self.result}
+
+    def fake_post(url, json, timeout):
+        method = url.rsplit("/", 1)[1]
+        calls.append(method)
+        return Resp({"getMe": {"username": "b"}, "getWebhookInfo": {"url": "https://worker"}}.get(method, []))
+
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "t")
+    monkeypatch.setattr(cli.requests, "post", fake_post)
+    with pytest.raises(SystemExit, match="webhook"):
+        cli.discover()
+    assert calls == ["getMe", "getWebhookInfo"]
 
 
 def test_monthly_with_nothing_found():
@@ -245,8 +275,8 @@ def _status_db(path=":memory:"):
     db.upsert_event(Event(title="Long Ago", start_date="2026-10-01"))
     db.mark_posted(event_key("Posted <Gig>", "2026-11-20"), 55)
     db.mark_reviewed([event_key("Skipped", "2026-11-21")])
-    db.set_reactions(55, 1, ["👍"])
-    db.set_reactions(55, 2, ["👎"])
+    _add_reaction(db, 55, 1, "👍")
+    _add_reaction(db, 55, 2, "👎")
     db.mark_alerted(["some-key"])
     db.commit()
     return db

@@ -1,0 +1,10 @@
+name = "lepain-date-ideas"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[vars]
+# Flash-Lite first, so /idea doesn't use up the daily quota the digests rely on (limits are per model).
+GEMINI_MODEL = "gemini-flash-lite-latest"
+GEMINI_BACKUP_MODEL = "gemini-flash-latest"
+DATA_BASE_URL = "https://raw.githubusercontent.com/PhilipLeeMinTar/LePain_date_ideas_generator/main"

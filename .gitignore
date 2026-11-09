@@ -5,3 +5,5 @@ __pycache__/
 .pytest_cache/
 data/*.db-journal
 .DS_Store
+.wrangler/
+node_modules/

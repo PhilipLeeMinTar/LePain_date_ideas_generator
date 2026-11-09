@@ -187,15 +187,6 @@ class DB:
         self.conn.executemany("INSERT OR IGNORE INTO alerts (key, sent_at) VALUES (?, ?)", [(k, ts) for k in keys])
 
     # ---- reactions ----------------------------------------------------
-    def set_reactions(self, message_id: int, user_id: int, emojis: list[str]) -> None:
-        """Replace a user's reactions on a message with their current set."""
-        self.conn.execute("DELETE FROM reactions WHERE message_id = ? AND user_id = ?", (message_id, user_id))
-        ts = now_iso()
-        self.conn.executemany(
-            "INSERT OR IGNORE INTO reactions VALUES (?, ?, ?, ?)",
-            [(message_id, user_id, e, ts) for e in emojis],
-        )
-
     def feedback(self, limit: int = 40) -> tuple[list[Event], list[Event]]:
         """Posted events the two of you reacted to: (liked, disliked). Net score per event."""
         rows = self.conn.execute(
@@ -262,6 +253,13 @@ class DB:
             f"""SELECT * FROM events WHERE {state} AND COALESCE(end_date, start_date) >= ?
                 ORDER BY start_date LIMIT ?""",
             (today.isoformat(), limit),
+        ).fetchall()
+        return [self._row_to_event(r) for r in rows]
+
+    def upcoming_all(self, today: date) -> list[Event]:
+        rows = self.conn.execute(
+            "SELECT * FROM events WHERE COALESCE(end_date, start_date) >= ? ORDER BY start_date, title",
+            (today.isoformat(),),
         ).fetchall()
         return [self._row_to_event(r) for r in rows]
 

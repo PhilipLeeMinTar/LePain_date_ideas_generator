@@ -46,8 +46,12 @@ def discover() -> None:
 
     hook = call("getWebhookInfo")
     if hook.get("url"):
-        print(f"⚠️  A webhook is set ({hook['url']}). That blocks getUpdates, so removing it now.")
-        call("deleteWebhook", {"drop_pending_updates": False})
+        # Never remove it here: that would silently switch off the /idea command.
+        sys.exit(
+            f"A webhook is set ({hook['url']}), so /idea is live and Telegram won't hand updates to this helper.\n"
+            "Your chat id is still in the TELEGRAM_CHAT_ID secret. To rediscover ids, delete the webhook first\n"
+            "(see the README), run this again, then set the webhook back."
+        )
 
     def show(updates) -> bool:
         found = False
@@ -119,7 +123,6 @@ def main(argv: list[str] | None = None) -> None:
             llm=GeminiLLM(settings.gemini_api_key, settings.gemini_model, on_call=db.record_gemini_call),
             today=today,
             profile=settings.taste_profile_path.read_text(encoding="utf-8"),
-            chat_id=settings.chat_id,
         )
         if args.job == "monthly":
             month = date.fromisoformat(args.month + "-01") if args.month else None
@@ -129,6 +132,8 @@ def main(argv: list[str] | None = None) -> None:
         else:
             jobs.daily(ctx)
     finally:
+        if not args.dry_run and args.job != "status":
+            jobs.export_events(db, today, settings.db_path.parent / "events.json")
         db.close()
 
 
