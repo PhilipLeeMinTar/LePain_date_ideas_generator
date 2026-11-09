@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
-from .config import TZ
+from .config import GEMINI_KNOWN_DAILY_LIMITS, TZ, gemini_day
 from .dates import overlaps_month
 
 SCHEMA = """
@@ -44,6 +44,13 @@ CREATE TABLE IF NOT EXISTS alerts (
 CREATE TABLE IF NOT EXISTS meta (
     k TEXT PRIMARY KEY,
     v TEXT
+);
+CREATE TABLE IF NOT EXISTS gemini_usage (
+    day    TEXT NOT NULL,       -- quota day (Pacific time)
+    model  TEXT NOT NULL,
+    ok     INTEGER NOT NULL DEFAULT 0,
+    failed INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, model)
 );
 """
 
@@ -205,6 +212,26 @@ class DB:
         liked = [events[k] for k, s in score.items() if s > 0][:limit]
         disliked = [events[k] for k, s in score.items() if s < 0][:limit]
         return liked, disliked
+
+    # ---- Gemini usage -------------------------------------------------
+    def record_gemini_call(self, model: str, ok: bool, daily_limit: int | None = None) -> None:
+        self.conn.execute(
+            """INSERT INTO gemini_usage (day, model, ok, failed) VALUES (?, ?, ?, ?)
+               ON CONFLICT(day, model) DO UPDATE SET ok = ok + excluded.ok, failed = failed + excluded.failed""",
+            (gemini_day(), model, int(ok), int(not ok)),
+        )
+        if daily_limit is not None:
+            self.set_meta(f"gemini_daily_limit:{model}", str(daily_limit))
+
+    def gemini_usage(self, day: str) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT model, ok, failed FROM gemini_usage WHERE day = ? ORDER BY ok + failed DESC, model", (day,)
+        ).fetchall()
+        out = []
+        for r in rows:
+            saved = self.get_meta(f"gemini_daily_limit:{r['model']}")
+            out.append({**dict(r), "limit": int(saved) if saved else GEMINI_KNOWN_DAILY_LIMITS.get(r["model"])})
+        return out
 
     # ---- status report ------------------------------------------------
     def stats(self, today: date) -> dict[str, int]:

@@ -27,13 +27,12 @@ SOURCES: list[Source] = [
     # General "what's on" calendars
     Source("Honeycombers (this month)", "https://thehoneycombers.com/singapore/singapore-event-calendar/this-month/"),
     Source("Honeycombers (calendar)", "https://thehoneycombers.com/singapore/singapore-event-calendar/"),
-    # Removed (block bots): Time Out monthly list (HTTP 405), Eventworld concerts (HTTP 403).
+    # Removed (block bots): Time Out monthly list (HTTP 405), Eventworld concerts (HTTP 403),
+    # Songkick (HTTP 406). Removed (no events in the plain HTML): Esplanade what's on.
     # Live music + ticket sale dates
-    Source("Songkick Singapore", "https://www.songkick.com/metro-areas/32258-singapore-singapore"),
     Source("Honeycombers concerts", "https://thehoneycombers.com/singapore/upcoming-concerts-shows-bands-singapore/"),
     Source("TheSmartLocal concerts", "https://thesmartlocal.com/read/upcoming-concerts-in-singapore/"),
     Source("The Kallang events", "https://www.thekallang.com.sg/events"),
-    Source("Esplanade what's on", "https://www.esplanade.com/whats-on"),
 ]
 
 

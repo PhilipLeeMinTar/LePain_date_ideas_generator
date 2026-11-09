@@ -51,6 +51,7 @@ def make_ctx(today, events_by_source, tg=None, pick_all=True):
         chat_id="-100123",
         fetch=lambda url: "<html><body>events</body></html>",
         sources=[Source("Src", "https://example.com/{month_name}")],
+        min_page_chars=0,
     )
 
 
@@ -235,6 +236,68 @@ def test_status_on_empty_db():
     tg = FakeTG()
     jobs.status(DB(":memory:"), tg, date(2026, 11, 9))
     assert "Events stored: 0" in tg.sent[0] and "Next posted picks" not in tg.sent[0]
+    assert "None recorded yet" in tg.sent[0]
+
+
+def test_status_shows_gemini_usage_and_limits():
+    db, tg = DB(":memory:"), FakeTG()
+    db.record_gemini_call("gemini-3.8-flash", True)
+    db.record_gemini_call("gemini-3.8-flash", False)
+    db.record_gemini_call("gemini-new-flash", True)
+    db.record_gemini_call("gemini-learned-flash", False, daily_limit=50)
+    jobs.status(db, tg, date(2026, 11, 9))
+    assert "gemini-3.8-flash: 2 of 20 used (1 failed)" in tg.sent[0]
+    assert "gemini-new-flash: 1 used, limit not known yet (0 failed)" in tg.sent[0]
+    assert "gemini-learned-flash: 1 of 50 used (1 failed)" in tg.sent[0]
+
+
+# ------------------------------------------------------------------ resume / skipping
+class _CountingLLM(FakeLLM):
+    def __init__(self, fail_for=()):
+        super().__init__({})
+        self.fail_for = set(fail_for)
+        self.calls: list[str] = []
+
+    def extract(self, page_text, source, today):
+        self.calls.append(source)
+        if source in self.fail_for:
+            raise ValueError("overloaded")
+        return []
+
+
+def test_rerun_same_day_only_retries_failed_sources():
+    ctx = make_ctx(date(2026, 11, 9), {})
+    ctx.sources = [Source("A", "https://a"), Source("B", "https://b")]
+    ctx.llm = _CountingLLM(fail_for={"B"})
+    jobs.refresh(ctx, [date(2026, 11, 1)])
+    ctx.llm = _CountingLLM()
+    jobs.refresh(ctx, [date(2026, 11, 1)])
+    assert ctx.llm.calls == ["B"]
+    ctx.llm = _CountingLLM()
+    jobs.refresh(ctx, [date(2026, 11, 1)])  # everything done: still counts as success, no requests
+    assert ctx.llm.calls == []
+    ctx.today = date(2026, 11, 10)
+    jobs.refresh(ctx, [date(2026, 11, 1)])  # a new day scrapes again
+    assert ctx.llm.calls == ["A", "B"]
+
+
+def test_unreachable_or_empty_pages_cost_no_gemini_request():
+    ctx = make_ctx(date(2026, 11, 9), {})
+    ctx.sources = [Source("Down", "https://down"), Source("Empty", "https://empty"), Source("Good", "https://good")]
+    pages = {"https://down": None, "https://empty": "<html><body>Blocked</body></html>",
+             "https://good": f"<html><body>{'event listing ' * 100}</body></html>"}
+    ctx.fetch = pages.get
+    ctx.min_page_chars = 500
+    ctx.llm = _CountingLLM()
+    jobs.refresh(ctx, [date(2026, 11, 1)])
+    assert ctx.llm.calls == ["Good"]
+
+
+def test_refresh_fails_loudly_when_every_page_is_down():
+    ctx = make_ctx(date(2026, 11, 9), {})
+    ctx.fetch = lambda url: None
+    with pytest.raises(RuntimeError, match="No source could be processed"):
+        jobs.refresh(ctx, [date(2026, 11, 1)])
 
 
 def test_status_cli_needs_no_gemini(tmp_path, monkeypatch, capsys):
@@ -294,6 +357,94 @@ def test_model_unavailable_stops_immediately():
     with pytest.raises(ModelUnavailable):
         jobs.monthly(ctx)
     assert len(calls) == 1
+
+
+def _scripted_llm(script, monkeypatch, calls=None):
+    """A GeminiLLM whose requests follow `script`: {model: error to raise}. Other models succeed."""
+    class Resp:
+        parsed = [{"key": "k1", "why": "great"}]
+        text = None
+
+    class Model:
+        def __init__(self, n):
+            self.name, self.supported_actions = n, ["generateContent"]
+
+    class Models:
+        used: list[str] = []
+
+        def generate_content(self, model, contents, config):
+            self.used.append(model)
+            if model in script:
+                raise script[model]
+            return Resp()
+
+        def list(self):
+            return [Model("models/gemini-3.8-flash"), Model("models/gemini-3.5-flash"),
+                    Model("models/gemini-3.1-flash-lite")]
+
+    monkeypatch.setattr("bot.llm.time.sleep", lambda s: None)
+    on_call = (lambda *a: calls.append(a)) if calls is not None else None
+    llm = GeminiLLM("fake-key", "gemini-flash-latest", min_interval_s=0, on_call=on_call)
+
+    class FakeClient:
+        models = Models()
+
+    FakeClient.models.used = []
+    llm.client = FakeClient()
+    return llm
+
+
+_ONE_EVENT = [Event(title="X", start_date="2026-12-01", key="k1")]
+
+
+def test_overloaded_model_switches_to_backup_after_retries(monkeypatch):
+    from google.genai import errors
+
+    overloaded = errors.ServerError(503, {"error": {"code": 503, "message": "busy", "status": "UNAVAILABLE"}})
+    calls = []
+    llm = _scripted_llm({"gemini-flash-latest": overloaded}, monkeypatch, calls)
+    assert llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx") == [("k1", "great")]
+    assert llm.client.models.used == ["gemini-flash-latest"] * 4 + ["gemini-3.8-flash"]
+    assert llm.model == "gemini-3.8-flash"
+    assert calls.count(("gemini-flash-latest", False, None)) == 4 and calls[-1] == ("gemini-3.8-flash", True, None)
+
+
+def test_dropped_connection_also_uses_backup(monkeypatch):
+    import httpx2
+
+    llm = _scripted_llm({"gemini-flash-latest": httpx2.RemoteProtocolError("disconnected")}, monkeypatch)
+    assert llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx") == [("k1", "great")]
+    assert llm.model == "gemini-3.8-flash"
+
+
+def test_daily_quota_switches_at_once_and_learns_the_limit(monkeypatch):
+    from google.genai import errors
+
+    quota = errors.ClientError(429, {"error": {
+        "code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED",
+        "details": [{"violations": [{
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {"location": "global", "model": "gemini-3.8-flash"}, "quotaValue": "20",
+        }]}],
+    }})
+    calls = []
+    llm = _scripted_llm({"gemini-flash-latest": quota}, monkeypatch, calls)
+    assert llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx") == [("k1", "great")]
+    # One try only, and the alias's real model is not picked as its own backup.
+    assert llm.client.models.used == ["gemini-flash-latest", "gemini-3.5-flash"]
+    assert calls[0] == ("gemini-3.8-flash", False, 20)
+
+
+def test_gives_up_when_every_model_is_overloaded(monkeypatch):
+    from google.genai import errors
+
+    overloaded = errors.ServerError(503, {"error": {"code": 503, "message": "busy", "status": "UNAVAILABLE"}})
+    script = {m: overloaded for m in
+              ("gemini-flash-latest", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite")}
+    llm = _scripted_llm(script, monkeypatch)
+    with pytest.raises(errors.ServerError):
+        llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx")
+    assert llm.client.models.used[-2:] == ["gemini-3.1-flash-lite"] * 2
 
 
 def test_gemini_404_falls_back_to_listed_model(monkeypatch):

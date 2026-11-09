@@ -6,7 +6,7 @@ import logging
 import re
 import time
 from datetime import date
-from typing import Optional, Protocol
+from typing import Callable, Optional, Protocol
 
 from pydantic import BaseModel, Field
 
@@ -102,8 +102,21 @@ class ModelUnavailable(RuntimeError):
 _SKIP_MODEL_WORDS = ("image", "tts", "live", "audio", "embedding", "vision", "exp", "learnlm", "computer")
 
 
-def pick_flash_model(names: list[str]) -> str | None:
-    """Choose the best general-purpose Flash model from a ListModels result.
+RETRYABLE = (429, 500, 503)
+MAX_BACKUP_MODELS = 3
+# Quota errors name the exhausted daily limit: ...PerDay... 'model': 'x' ... 'quotaValue': '20'
+_DAILY_QUOTA = re.compile(r"PerDay.*?'model':\s*'([^']+)'.*?'quotaValue':\s*'(\d+)'", re.DOTALL)
+
+
+def _is_gemini_failure(e: Exception) -> bool:
+    """An API error or a dropped connection. Matched by name because the SDK's HTTP library varies by version."""
+    from google.genai import errors
+
+    return isinstance(e, errors.APIError) or any(c.__name__ == "TransportError" for c in type(e).__mro__)
+
+
+def rank_flash_models(names: list[str]) -> list[str]:
+    """General-purpose Flash models from a ListModels result, best first.
 
     Prefers stable over preview, full Flash over Flash-Lite, and higher version numbers.
     """
@@ -115,13 +128,21 @@ def pick_flash_model(names: list[str]) -> str | None:
         n.removeprefix("models/") for n in names
         if "flash" in n and "gemini" in n and not any(w in n for w in _SKIP_MODEL_WORDS)
     ]
-    if not cands:
-        return None
-    return max(cands, key=lambda n: ("preview" not in n, "lite" not in n, "latest" not in n, version(n)))
+    return sorted(
+        cands, key=lambda n: ("preview" not in n, "lite" not in n, "latest" not in n, version(n)), reverse=True
+    )
+
+
+def pick_flash_model(names: list[str]) -> str | None:
+    ranked = rank_flash_models(names)
+    return ranked[0] if ranked else None
 
 
 class GeminiLLM:
-    def __init__(self, api_key: str, model: str, min_interval_s: float = 6.0):
+    def __init__(
+        self, api_key: str, model: str, min_interval_s: float = 6.0,
+        on_call: Callable[[str, bool, int | None], None] | None = None,
+    ):
         from google import genai  # imported lazily so tests don't need the SDK configured
         from google.genai import types
 
@@ -131,9 +152,15 @@ class GeminiLLM:
         self.model = model
         self.min_interval_s = min_interval_s  # free tier has low requests-per-minute limits
         self._last = 0.0
-        self._fallback_tried = False
+        self.on_call = on_call  # told about every request, for the usage count in `status`
+        self._tried = {model}
+        self._backups_used = 0
+        self._actual: dict[str, str] = {}  # alias -> real model, e.g. gemini-flash-latest -> gemini-3.8-flash
 
-    def _fallback_model(self) -> str | None:
+    def _next_backup(self) -> str | None:
+        """Best Flash model not tried yet in this run."""
+        if self._backups_used >= MAX_BACKUP_MODELS:
+            return None
         try:
             names = [
                 m.name for m in self.client.models.list()
@@ -142,47 +169,76 @@ class GeminiLLM:
         except Exception as e:  # noqa: BLE001
             log.error("Could not list Gemini models: %s", e)
             return None
-        return pick_flash_model(names)
+        skip = self._tried | set(self._actual.values())
+        return next((n for n in rank_flash_models(names) if n not in skip), None)
 
-    def _generate(self, prompt: str, schema):
-        from google.genai import errors, types
+    def _record(self, ok: bool, model: str | None = None, daily_limit: int | None = None) -> None:
+        if self.on_call:
+            self.on_call(model or self._actual.get(self.model, self.model), ok, daily_limit)
 
-        cfg = types.GenerateContentConfig(
-            response_mime_type="application/json", response_schema=schema, temperature=0.2
-        )
-        for attempt in range(4):
+    def _request(self, prompt: str, cfg, tries: int):
+        """Call the current model, retrying temporary errors. Raises once out of tries."""
+        for attempt in range(tries):
             wait = self.min_interval_s - (time.monotonic() - self._last)
             if wait > 0:
                 time.sleep(wait)
             self._last = time.monotonic()
             try:
                 resp = self.client.models.generate_content(model=self.model, contents=prompt, config=cfg)
-                if resp.parsed is not None:
-                    return resp.parsed
-                return json.loads(resp.text or "[]")
-            except errors.APIError as e:
-                code = getattr(e, "code", None)
-                if code == 404:
-                    if not self._fallback_tried:
-                        self._fallback_tried = True
-                        alt = self._fallback_model()
-                        if alt and alt != self.model:
-                            log.warning("Gemini model %r not found; switching to %r", self.model, alt)
-                            self.model = alt
-                            continue
-                    raise ModelUnavailable(
-                        f"Gemini model {self.model!r} is not available for this API key. "
-                        "Set the GEMINI_MODEL repo variable to a model listed in Google AI Studio."
-                    ) from e
-                if code in (401, 403):
-                    raise ModelUnavailable(f"Gemini rejected the API key ({code}): {e}") from e
-                if code in (429, 500, 503) and attempt < 3:
+            except Exception as e:  # noqa: BLE001
+                if not _is_gemini_failure(e):
+                    raise
+                code = getattr(e, "code", 503)  # a dropped connection has no status code
+                daily =_DAILY_QUOTA.search(str(e)) if code == 429 else None
+                if daily:
+                    self._record(False, daily.group(1), int(daily.group(2)))
+                    self._actual[self.model] = daily.group(1)
+                    raise  # won't recover until tomorrow, so don't wait around
+                self._record(False)
+                if code in RETRYABLE and attempt < tries - 1:
                     delay = 20 * (attempt + 1)
                     log.warning("Gemini %s, retrying in %ss", code, delay)
                     time.sleep(delay)
                     continue
                 raise
+            actual = getattr(resp, "model_version", None)
+            if isinstance(actual, str) and actual:
+                self._actual[self.model] = actual
+            self._record(True)
+            if resp.parsed is not None:
+                return resp.parsed
+            return json.loads(resp.text or "[]")
         return []
+
+    def _generate(self, prompt: str, schema):
+        from google.genai import types
+
+        cfg = types.GenerateContentConfig(
+            response_mime_type="application/json", response_schema=schema, temperature=0.2
+        )
+        while True:
+            try:
+                return self._request(prompt, cfg, tries=2 if self._backups_used else 4)
+            except Exception as e:  # noqa: BLE001
+                if not _is_gemini_failure(e):
+                    raise
+                code = getattr(e, "code", 503)
+                if code in (401, 403):
+                    raise ModelUnavailable(f"Gemini rejected the API key ({code}): {e}") from e
+                if code != 404 and code not in RETRYABLE:
+                    raise
+                alt = self._next_backup()
+                if alt is None:
+                    if code == 404:
+                        raise ModelUnavailable(
+                            f"Gemini model {self.model!r} is not available for this API key. "
+                            "Set the GEMINI_MODEL repo variable to a model listed in Google AI Studio."
+                        ) from e
+                    raise
+                log.warning("Gemini model %r failed (%s); switching to backup %r", self.model, code, alt)
+                self.model = alt
+                self._tried.add(alt)
+                self._backups_used += 1
 
     def extract(self, page_text: str, source: str, today: date) -> list[Event]:
         prompt = EXTRACT_PROMPT.format(today=today.isoformat(), source=source, page=page_text)

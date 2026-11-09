@@ -116,7 +116,7 @@ def main(argv: list[str] | None = None) -> None:
         ctx = jobs.Ctx(
             db=db,
             tg=tg,
-            llm=GeminiLLM(settings.gemini_api_key, settings.gemini_model),
+            llm=GeminiLLM(settings.gemini_api_key, settings.gemini_model, on_call=db.record_gemini_call),
             today=today,
             profile=settings.taste_profile_path.read_text(encoding="utf-8"),
             chat_id=settings.chat_id,

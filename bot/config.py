@@ -3,11 +3,32 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("Asia/Singapore")
 ROOT = Path(__file__).resolve().parent.parent
+
+# Pages with less text than this are blocked or empty, so they aren't worth a Gemini request.
+MIN_PAGE_CHARS = 500
+
+# Gemini's daily quota resets at midnight Pacific time.
+GEMINI_QUOTA_TZ = ZoneInfo("America/Los_Angeles")
+# Daily limits seen in Google's quota errors. New ones are learned from those errors and saved in the DB.
+GEMINI_KNOWN_DAILY_LIMITS = {"gemini-3.8-flash": 20}
+
+
+def gemini_day() -> str:
+    """The current quota day."""
+    return datetime.now(GEMINI_QUOTA_TZ).date().isoformat()
+
+
+def gemini_reset_time() -> str:
+    """When the quota next resets, in Singapore time, e.g. '4pm'."""
+    now = datetime.now(GEMINI_QUOTA_TZ)
+    midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return midnight.astimezone(TZ).strftime("%I%p").lstrip("0").lower()
 
 MONTHLY_PICKS_MIN = 10
 MONTHLY_PICKS_MAX = 15

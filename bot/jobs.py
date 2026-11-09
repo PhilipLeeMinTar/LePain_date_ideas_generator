@@ -7,7 +7,10 @@ from datetime import date, timedelta
 from typing import Callable
 
 from . import formatting as fmt
-from .config import HORIZON_DAYS, MONTHLY_PICKS_MAX, MONTHLY_PICKS_MIN, WEEKLY_PICKS_MAX
+from .config import (
+    HORIZON_DAYS, MIN_PAGE_CHARS, MONTHLY_PICKS_MAX, MONTHLY_PICKS_MIN, WEEKLY_PICKS_MAX,
+    gemini_day, gemini_reset_time,
+)
 from .dates import (
     month_label, month_start, monthly_target_month, next_month, parse_iso, weekly_target_months,
 )
@@ -30,6 +33,7 @@ class Ctx:
     chat_id: str
     fetch: Callable[[str], str | None] = fetch
     sources: list[Source] = field(default_factory=lambda: list(SOURCES))
+    min_page_chars: int = MIN_PAGE_CHARS
 
 
 # ---------------------------------------------------------------- shared steps
@@ -49,17 +53,30 @@ def _clean(ev: Event, today: date) -> Event | None:
 
 
 def refresh(ctx: Ctx, months: list[date]) -> int:
-    """Scrape every source, extract events, store them. Returns number of new events."""
+    """Scrape every source, extract events, store them. Returns number of new events.
+
+    A source that succeeded today is skipped, so a rerun picks up where the last run stopped.
+    A page that is down, blocked or empty is skipped before any Gemini request is made.
+    """
     new_total = 0
     attempted = succeeded = 0
     for name, url in expand(ctx.sources, months):
+        scraped_key = f"scraped:{url}"
+        if ctx.db.get_meta(scraped_key) == ctx.today.isoformat():
+            log.info("[%s] already scraped today, skipping", name)
+            succeeded += 1
+            continue
         html = ctx.fetch(url)
         if not html:
             log.warning("[%s] no page content, skipping", name)
             continue
         attempted += 1
         try:
-            extracted = ctx.llm.extract(html_to_text(html, url), name, ctx.today)
+            text = html_to_text(html, url)
+            if len(text) < ctx.min_page_chars:
+                log.warning("[%s] page has almost no text (%d chars), skipping", name, len(text))
+                continue
+            extracted = ctx.llm.extract(text, name, ctx.today)
         except ModelUnavailable:
             raise  # config problem: stop now instead of failing every source the same way
         except Exception as e:  # noqa: BLE001
@@ -73,6 +90,7 @@ def refresh(ctx: Ctx, months: list[date]) -> int:
                 continue
             kept += 1
             new += ctx.db.upsert_event(ev)
+        ctx.db.set_meta(scraped_key, ctx.today.isoformat())
         ctx.db.commit()
         log.info("[%s] %d extracted, %d kept, %d new", name, len(extracted), kept, new)
         new_total += new
@@ -172,4 +190,5 @@ def status(db: DB, tg: Telegram, today: date) -> None:
     """Post a summary of the database. No scraping and no Gemini calls, so it costs no quota."""
     tg.send(fmt.status_message(
         db.stats(today), db.upcoming(today, posted=True), db.upcoming(today, posted=False), today,
+        db.gemini_usage(gemini_day()), gemini_reset_time(),
     ))

@@ -71,7 +71,16 @@ def nothing_new() -> str:
     return "🗓️ <b>Weekly update</b>: nothing new worth adding this week."
 
 
-def status_message(stats: dict[str, int], picks: list[Event], waiting: list[Event], today: date) -> str:
+def _usage_line(u: dict) -> str:
+    used = u["ok"] + u["failed"]
+    count = f"{used} of {u['limit']} used" if u["limit"] else f"{used} used, limit not known yet"
+    return f"• {escape(u['model'])}: {count} ({u['failed']} failed)"
+
+
+def status_message(
+    stats: dict[str, int], picks: list[Event], waiting: list[Event], today: date,
+    usage: list[dict], reset_time: str,
+) -> str:
     def section(title: str, events: list[Event]) -> list[str]:
         if not events:
             return []
@@ -86,6 +95,9 @@ def status_message(stats: dict[str, int], picks: list[Event], waiting: list[Even
         f"⏳ Not considered yet: {stats['not_considered']}",
         f"💬 Reactions saved: {stats['reactions']} (👍 {stats['liked']} · 👎 {stats['disliked']})",
         f"🎟️ Ticket alerts sent: {stats['alerts']}",
+        "",
+        f"<b>🤖 Gemini requests today</b> (resets {reset_time} SGT)",
+        *([_usage_line(u) for u in usage] or ["• None recorded yet"]),
         *section("Next posted picks", picks),
         *section("Next events not considered yet", waiting),
     ])

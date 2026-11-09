@@ -43,7 +43,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   - An event moves through `reviewed_at` → `posted_at`/`message_id`. "Reviewed" means a digest already considered it, so the weekly job only looks at genuinely new events.
 - `bot/llm.py`: Gemini via `google-genai`.
   - **Must use `api_version="v1beta"`.** The SDK 3.x defaults to `v1`, which returns 404 for `gemini-flash-latest`.
-  - On a 404 it calls ListModels and switches to the best Flash model (`pick_flash_model`).
+  - On a 404, or when a model stays overloaded or out of quota after retries, it calls ListModels and switches to the next best Flash model for the rest of the run (up to 3 backups).
+  - Every request is counted in the `gemini_usage` table and shown by `status`. Google has no API for remaining quota, so daily limits are learned from its 429 errors. Dry-run requests aren't counted, because dry runs don't save the DB.
+  - `refresh()` remembers each source that succeeded today (`scraped:<url>` in `meta`), so reruns skip them. Pages that are down, blocked or almost empty are skipped before any Gemini request.
   - `ModelUnavailable` (404 with no fallback, or 401/403) stops the run immediately.
   - Requests are paced at ~6s for the free tier, with retries on 429/5xx.
 - `bot/telegram.py`: minimal Bot API client. Never log URLs, because they contain the token.
@@ -67,7 +69,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 ## Sources notes
 
 - Pages must render without JavaScript.
-- Removed because they block bots: Time Out monthly (HTTP 405), Eventworld (HTTP 403).
+- Removed because they block bots: Time Out monthly (HTTP 405), Eventworld (HTTP 403), Songkick (HTTP 406). Removed because no events could be extracted: Esplanade what's on.
 - If the logs show `0 extracted` or fetch errors for a source, swap it out.
 - URL placeholders: `{month_name}`, `{month_num}`, `{year}`.
 
