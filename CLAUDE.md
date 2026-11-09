@@ -25,19 +25,22 @@ It is **broadcast-only** and runs entirely on **GitHub Actions cron jobs**. The 
 | `weekly` | Mondays, 7pm | Newly found events for the current month (plus next month from the 25th onward). Max 5. Posts "nothing new this week" if there are none. Skips the 25th |
 | `daily` | 9am | Collects reactions (Telegram keeps updates ~24h), refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once |
 
-New posts are always new messages. Existing messages are never edited (the owner's choice).
+`status` is manual-only: it posts a database and Gemini usage summary.
+
+New posts are always new messages. Existing messages are never edited (the owner's choice). The owner asked for one combined message per digest, because one message per event felt like spam.
 
 ## Architecture
 
 ```
 bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON-LD Events)
   → llm.GeminiLLM.extract (structured output) → jobs._clean → db.upsert_event (dedupe)
-  → llm.GeminiLLM.rank (taste_profile.md + liked/disliked from reactions) → formatting → telegram.send
+  → llm.GeminiLLM.rank (taste_profile.md + liked/disliked from older reactions) → formatting.digest → telegram.send
 ```
 
 - `bot/__main__.py`: CLI. `python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids) and `python -m bot status` (manual-only database summary with no Gemini calls; in the workflow it ignores `dry_run` and always posts).
-- `bot/jobs.py`: the three jobs, plus `refresh()` and `collect_reactions()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
-- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `meta` (stores `update_offset`).
+- `bot/jobs.py`: the three scheduled jobs and `status`, plus `refresh()` and `collect_reactions()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
+  - `refresh()` remembers each source that succeeded today (`scraped:<url>` in `meta`), so reruns and the evening digests skip them. Pages that are down, blocked or almost empty (under `MIN_PAGE_CHARS`) are skipped before any Gemini request.
+- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `gemini_usage`, `meta` (stores `update_offset`, `scraped:<url>` and learned `gemini_daily_limit:<model>` values).
   - Event key = sha1 of the normalized title (years and filler words stripped) plus start date.
   - Upserts only fill in missing fields.
   - An event moves through `reviewed_at` → `posted_at`/`message_id`. "Reviewed" means a digest already considered it, so the weekly job only looks at genuinely new events.
@@ -45,11 +48,12 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   - **Must use `api_version="v1beta"`.** The SDK 3.x defaults to `v1`, which returns 404 for `gemini-flash-latest`.
   - On a 404, or when a model stays overloaded or out of quota after retries, it calls ListModels and switches to the next best Flash model for the rest of the run (up to 3 backups).
   - Every request is counted in the `gemini_usage` table and shown by `status`. Google has no API for remaining quota, so daily limits are learned from its 429 errors. Dry-run requests aren't counted, because dry runs don't save the DB.
-  - `refresh()` remembers each source that succeeded today (`scraped:<url>` in `meta`), so reruns skip them. Pages that are down, blocked or almost empty are skipped before any Gemini request.
   - `ModelUnavailable` (404 with no fallback, or 401/403) stops the run immediately.
-  - Requests are paced at ~6s for the free tier, with retries on 429/5xx.
+  - Requests are paced at ~6s for the free tier, with retries on 429/5xx and dropped connections. An exhausted daily quota skips the retries and goes straight to a backup.
+  - The free tier allowed 20 requests per day for `gemini-3.8-flash` when last hit. The quota day runs on Pacific time.
+  - Dropped connections are matched by exception class name, because the SDK's HTTP library (`httpx2` in 3.0) varies by version.
 - `bot/telegram.py`: minimal Bot API client. Never log URLs, because they contain the token.
-- `bot/formatting.py`: HTML parse mode, so always `html.escape` text. Long ticket alerts are split to stay under the 4096-character limit.
+- `bot/formatting.py`: HTML parse mode, so always `html.escape` text. Digests show only name, date/time and link, sorted by date. Long digests and ticket alerts are split to stay under the 4096-character limit.
 - `taste_profile.md`: plain-English preferences the ranker reads. **Love:** good food, cool live music. **Open to:** arts (stand-out items only), experiences. **Not really:** nightlife (for now), kids/business/expos/sales.
 
 ## Failure behaviour (intentional)
@@ -63,7 +67,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 - Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_THREAD_ID`, `GEMINI_API_KEY` (free AI Studio key, no billing).
 - Optional repo variable: `GEMINI_MODEL` (default `gemini-flash-latest`).
-- Manual runs: Actions → date-ideas-bot → Run workflow (job, dry_run, month).
+- Manual runs: Actions → date-ideas-bot → Run workflow (job, dry_run, month). `dry_run` is ticked by default.
+- To pause: `gh workflow disable bot.yml`, which also blocks manual runs. `gh workflow enable bot.yml` resumes.
+- The job timeout is 60 minutes.
 - A concurrency group serialises runs, since they share the SQLite file.
 - The bot must be a **group admin** to receive `message_reaction` updates. **Never set a webhook**: the bot relies on `getUpdates`.
 
@@ -76,9 +82,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 ## Status (2026-11-09)
 
-- Phase 1 code is complete. 19 tests pass.
-- First dry run failed with the Gemini 404 (fixed: v1beta plus model fallback) and with the two blocked sources (removed).
-- **Next:** push the fix, rerun the dry run (`monthly`, month `2026-11`), check the per-source extraction counts and the picks, tune sources and prompts, then run it for real to post November's lineup.
+- Phase 1 is live. November's lineup was posted on 2026-11-09 as 13 separate messages, before the switch to combined messages. 33 tests pass (`pytest` isn't in `requirements.txt`, so install it separately).
+- Not yet seen in production: a combined digest in Telegram, and the backup model switch (covered by tests only).
+- **Next:** check the first combined digest, then watch whether the daily schedule stays within the Gemini quota.
 
 ## Roadmap (agreed, not started)
 
