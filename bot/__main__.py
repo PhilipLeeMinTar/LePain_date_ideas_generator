@@ -2,6 +2,7 @@
 
   python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD]
   python -m bot monthly --month 2026-11     # post a lineup for a specific month
+  python -m bot status [--dry-run]          # post a database summary (no Gemini calls)
   python -m bot discover                    # print chat / topic ids (setup helper)
 """
 from __future__ import annotations
@@ -83,7 +84,7 @@ def discover() -> None:
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bot")
-    p.add_argument("job", choices=["daily", "weekly", "monthly", "discover"])
+    p.add_argument("job", choices=["daily", "weekly", "monthly", "status", "discover"])
     p.add_argument("--dry-run", action="store_true", help="print messages instead of posting; don't touch the real DB")
     p.add_argument("--today", help="pretend today is YYYY-MM-DD (testing)")
     p.add_argument("--month", help="monthly only: post the lineup for YYYY-MM instead of next month")
@@ -97,7 +98,7 @@ def main(argv: list[str] | None = None) -> None:
         discover()
         return
 
-    settings = Settings.from_env(dry_run=args.dry_run)
+    settings = Settings.from_env(dry_run=args.dry_run, need_gemini=args.job != "status")
     db_path: Path = settings.db_path
     if args.dry_run:  # work on a throwaway copy
         tmp = Path(tempfile.mkdtemp()) / "bot.db"
@@ -107,15 +108,19 @@ def main(argv: list[str] | None = None) -> None:
 
     today = date.fromisoformat(args.today) if args.today else datetime.now(TZ).date()
     db = DB(db_path)
-    ctx = jobs.Ctx(
-        db=db,
-        tg=Telegram(settings.telegram_token, settings.chat_id, settings.thread_id, dry_run=args.dry_run),
-        llm=GeminiLLM(settings.gemini_api_key, settings.gemini_model),
-        today=today,
-        profile=settings.taste_profile_path.read_text(encoding="utf-8"),
-        chat_id=settings.chat_id,
-    )
+    tg = Telegram(settings.telegram_token, settings.chat_id, settings.thread_id, dry_run=args.dry_run)
     try:
+        if args.job == "status":
+            jobs.status(db, tg, today)
+            return
+        ctx = jobs.Ctx(
+            db=db,
+            tg=tg,
+            llm=GeminiLLM(settings.gemini_api_key, settings.gemini_model),
+            today=today,
+            profile=settings.taste_profile_path.read_text(encoding="utf-8"),
+            chat_id=settings.chat_id,
+        )
         if args.job == "monthly":
             month = date.fromisoformat(args.month + "-01") if args.month else None
             jobs.monthly(ctx, month)

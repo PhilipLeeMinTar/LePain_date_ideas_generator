@@ -65,6 +65,11 @@ python -m bot weekly --dry-run --today 2026-11-30
 pytest -q
 ```
 
+## Check what's stored
+
+Actions → *date-ideas-bot* → *Run workflow* → job `status`. It posts a summary of the database to the group, takes about a
+minute, and makes no Gemini calls. It always posts, even with dry run ticked. Locally, `python -m bot status --dry-run` prints it.
+
 ## Good to know
 
 - The repo is public, so `data/bot.db` (events and your reactions) is public too. Secrets are not.

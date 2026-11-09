@@ -202,6 +202,56 @@ def test_monthly_with_nothing_found():
     assert len(ctx.tg.sent) == 1 and "couldn't find" in ctx.tg.sent[0]
 
 
+# ------------------------------------------------------------------ status
+def _status_db(path=":memory:"):
+    db = DB(path)
+    db.upsert_event(Event(title="Posted <Gig>", start_date="2026-11-20"))
+    db.upsert_event(Event(title="Skipped", start_date="2026-11-21"))
+    db.upsert_event(Event(title="Waiting", start_date="2026-12-01"))
+    db.upsert_event(Event(title="Long Ago", start_date="2026-10-01"))
+    db.mark_posted(event_key("Posted <Gig>", "2026-11-20"), 55)
+    db.mark_reviewed([event_key("Skipped", "2026-11-21")])
+    db.set_reactions(55, 1, ["👍"])
+    db.set_reactions(55, 2, ["👎"])
+    db.mark_alerted(["some-key"])
+    db.commit()
+    return db
+
+
+def test_status_reports_counts_and_lists_without_changing_db():
+    db, tg, today = _status_db(), FakeTG(), date(2026, 11, 9)
+    before = list(db.conn.iterdump())
+    jobs.status(db, tg, today)
+    assert list(db.conn.iterdump()) == before
+    assert len(tg.sent) == 1
+    msg = tg.sent[0]
+    for line in ("Events stored: 4", "Posted: 1", "Considered, not picked: 1", "Not considered yet: 1",
+                 "Reactions saved: 2 (👍 1 · 👎 1)", "Ticket alerts sent: 1"):
+        assert line in msg
+    assert "Posted &lt;Gig&gt;" in msg and "Waiting" in msg and "Long Ago" not in msg
+
+
+def test_status_on_empty_db():
+    tg = FakeTG()
+    jobs.status(DB(":memory:"), tg, date(2026, 11, 9))
+    assert "Events stored: 0" in tg.sent[0] and "Next posted picks" not in tg.sent[0]
+
+
+def test_status_cli_needs_no_gemini(tmp_path, monkeypatch, capsys):
+    import bot.__main__ as cli
+
+    def no_gemini(*a, **k):
+        raise AssertionError("status must not create a Gemini client")
+
+    path = tmp_path / "bot.db"
+    _status_db(path).close()
+    monkeypatch.setenv("BOT_DB_PATH", str(path))
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.setattr(cli, "GeminiLLM", no_gemini)
+    cli.main(["status", "--dry-run", "--today", "2026-11-09"])
+    assert "Events stored: 4" in capsys.readouterr().out
+
+
 # ------------------------------------------------------------------ resilience
 from bot.llm import GeminiLLM, ModelUnavailable, pick_flash_model
 

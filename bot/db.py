@@ -206,6 +206,38 @@ class DB:
         disliked = [events[k] for k, s in score.items() if s < 0][:limit]
         return liked, disliked
 
+    # ---- status report ------------------------------------------------
+    def stats(self, today: date) -> dict[str, int]:
+        """Counts for the status report. Read-only."""
+        row = self.conn.execute(
+            """SELECT COUNT(*) AS events,
+                      COALESCE(SUM(posted_at IS NOT NULL), 0) AS posted,
+                      COALESCE(SUM(posted_at IS NULL AND reviewed_at IS NOT NULL), 0) AS not_picked,
+                      COALESCE(SUM(posted_at IS NULL AND reviewed_at IS NULL
+                                   AND COALESCE(end_date, start_date) >= ?), 0) AS not_considered
+               FROM events""",
+            (today.isoformat(),),
+        ).fetchone()
+        emojis = [r["emoji"] for r in self.conn.execute("SELECT emoji FROM reactions")]
+        alerts = self.conn.execute("SELECT COUNT(*) FROM alerts").fetchone()[0]
+        return {
+            **dict(row),
+            "reactions": len(emojis),
+            "liked": sum(e in POSITIVE for e in emojis),
+            "disliked": sum(e in NEGATIVE for e in emojis),
+            "alerts": alerts,
+        }
+
+    def upcoming(self, today: date, posted: bool, limit: int = 5) -> list[Event]:
+        """Soonest events that haven't ended: posted picks, or ones no digest has considered yet."""
+        state = "posted_at IS NOT NULL" if posted else "posted_at IS NULL AND reviewed_at IS NULL"
+        rows = self.conn.execute(
+            f"""SELECT * FROM events WHERE {state} AND COALESCE(end_date, start_date) >= ?
+                ORDER BY start_date LIMIT ?""",
+            (today.isoformat(), limit),
+        ).fetchall()
+        return [self._row_to_event(r) for r in rows]
+
     # ---- meta ---------------------------------------------------------
     def get_meta(self, k: str) -> str | None:
         r = self.conn.execute("SELECT v FROM meta WHERE k = ?", (k,)).fetchone()

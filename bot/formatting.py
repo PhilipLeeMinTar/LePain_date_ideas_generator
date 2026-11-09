@@ -71,6 +71,26 @@ def nothing_new() -> str:
     return "🗓️ <b>Weekly update</b>: nothing new worth adding this week."
 
 
+def status_message(stats: dict[str, int], picks: list[Event], waiting: list[Event], today: date) -> str:
+    def section(title: str, events: list[Event]) -> list[str]:
+        if not events:
+            return []
+        items = [f"• {escape(e.title)} ({fmt_date_range(e.start_date, e.end_date)})" for e in events]
+        return ["", f"<b>{title}</b>", *items]
+
+    return "\n".join([
+        f"📊 <b>Bot status</b>, {_fmt_day(today)}",
+        f"🗂️ Events stored: {stats['events']}",
+        f"✅ Posted: {stats['posted']}",
+        f"⏭️ Considered, not picked: {stats['not_picked']}",
+        f"⏳ Not considered yet: {stats['not_considered']}",
+        f"💬 Reactions saved: {stats['reactions']} (👍 {stats['liked']} · 👎 {stats['disliked']})",
+        f"🎟️ Ticket alerts sent: {stats['alerts']}",
+        *section("Next posted picks", picks),
+        *section("Next events not considered yet", waiting),
+    ])
+
+
 def ticket_alert(events: list[Event]) -> list[str]:
     """One or more messages (split to respect Telegram's length limit)."""
     header = "🎟️ <b>Ticket sales coming up</b>\n"

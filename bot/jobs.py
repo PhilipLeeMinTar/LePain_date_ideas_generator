@@ -166,3 +166,10 @@ def daily(ctx: Ctx) -> None:
             ctx.tg.send(msg)
         ctx.db.mark_alerted([e.key for e in alerts])
     ctx.db.commit()
+
+
+def status(db: DB, tg: Telegram, today: date) -> None:
+    """Post a summary of the database. No scraping and no Gemini calls, so it costs no quota."""
+    tg.send(fmt.status_message(
+        db.stats(today), db.upcoming(today, posted=True), db.upcoming(today, posted=False), today,
+    ))

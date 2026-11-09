@@ -28,7 +28,7 @@ class Settings:
     dry_run: bool = False
 
     @classmethod
-    def from_env(cls, dry_run: bool = False) -> "Settings":
+    def from_env(cls, dry_run: bool = False, need_gemini: bool = True) -> "Settings":
         def env(name: str, required: bool) -> str:
             v = os.environ.get(name, "").strip()
             if not v and required:
@@ -41,7 +41,7 @@ class Settings:
             telegram_token=env("TELEGRAM_BOT_TOKEN", not dry_run),
             chat_id=env("TELEGRAM_CHAT_ID", not dry_run),
             thread_id=int(thread) if thread else None,
-            gemini_api_key=env("GEMINI_API_KEY", True),
+            gemini_api_key=env("GEMINI_API_KEY", need_gemini),
             gemini_model=os.environ.get("GEMINI_MODEL", "").strip() or "gemini-flash-latest",
             db_path=Path(os.environ.get("BOT_DB_PATH", ROOT / "data" / "bot.db")),
             taste_profile_path=ROOT / "taste_profile.md",

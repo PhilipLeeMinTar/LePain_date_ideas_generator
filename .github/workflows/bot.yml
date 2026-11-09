@@ -11,10 +11,10 @@ on:
       job:
         description: Which job to run
         type: choice
-        options: [daily, weekly, monthly]
+        options: [daily, weekly, monthly, status]
         default: daily
       dry_run:
-        description: Print messages in the log instead of posting (DB changes are not saved)
+        description: Print messages in the log instead of posting (DB changes are not saved). Ignored by status, which always posts.
         type: boolean
         default: true
       month:
@@ -59,7 +59,7 @@ jobs:
             *)             JOB="$INPUT_JOB" ;;
           esac
           ARGS="$JOB"
-          if [ "$INPUT_DRY" = "true" ]; then ARGS="$ARGS --dry-run"; echo "dry=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$INPUT_DRY" = "true" ] && [ "$JOB" != "status" ]; then ARGS="$ARGS --dry-run"; echo "dry=true" >> "$GITHUB_OUTPUT"; fi
           if [ "$JOB" = "monthly" ] && [ -n "$INPUT_MONTH" ]; then ARGS="$ARGS --month $INPUT_MONTH"; fi
           echo "args=$ARGS" >> "$GITHUB_OUTPUT"
           echo "Running: python -m bot $ARGS"

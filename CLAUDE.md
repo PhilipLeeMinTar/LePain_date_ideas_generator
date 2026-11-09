@@ -35,7 +35,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   → llm.GeminiLLM.rank (taste_profile.md + liked/disliked from reactions) → formatting → telegram.send
 ```
 
-- `bot/__main__.py`: CLI. `python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids).
+- `bot/__main__.py`: CLI. `python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids) and `python -m bot status` (manual-only database summary with no Gemini calls; in the workflow it ignores `dry_run` and always posts).
 - `bot/jobs.py`: the three jobs, plus `refresh()` and `collect_reactions()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
 - `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `meta` (stores `update_offset`).
   - Event key = sha1 of the normalized title (years and filler words stripped) plus start date.
