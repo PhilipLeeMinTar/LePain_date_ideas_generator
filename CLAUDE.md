@@ -9,7 +9,7 @@ Scheduled posts run on **GitHub Actions cron jobs**, and the `/idea` command run
 
 - Bot: `@lepain_date_ideas_generator_bot`
 - Group: supergroup with topics. Date Ideas topic `thread_id = 7`. The chat id is stored in the `TELEGRAM_CHAT_ID` secret.
-- Repo is **public**, so `data/bot.db` (events and reactions) is public. Secrets are not.
+- Repo is **public**, so `data/bot.db` (events and reactions) and `data/events.json` are public. Secrets are not.
 
 ## Working with the owner
 
@@ -76,6 +76,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 - The bot must be a **group admin** so the webhook receives group commands.
 - **The webhook and `getUpdates` are mutually exclusive.** Nothing in the scheduled jobs may call `getUpdates`, and `discover` exits rather than delete the webhook.
 - Worker secrets (set with `wrangler secret put`): `TELEGRAM_BOT_TOKEN`, `GEMINI_API_KEY`, `TELEGRAM_CHAT_ID`, `TELEGRAM_WEBHOOK_SECRET`.
+- Worker address: `https://lepain-date-ideas.lepain-date-ideas.workers.dev`. It rejects POSTs without the webhook secret.
+- `setWebhook` can fail with `Failed to resolve host` right after a first deploy, even when public DNS resolves the address. Retrying after a few minutes fixes it.
+- Local secrets live in `.env` (gitignored, never commit it or read it into chat). The bot doesn't load it: use `set -a; source .env; set +a`. GitHub and Cloudflare hold separate copies.
 
 ## Sources notes
 
@@ -88,8 +91,9 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 - Phase 1 is live. November's lineup was posted on 2026-11-09 as 13 separate messages, before the switch to combined messages. 36 Python tests and 15 Worker tests pass (`pytest` isn't in `requirements.txt`, so install it separately).
 - Not yet seen in production: a combined digest in Telegram, and the backup model switch (covered by tests only).
-- Phase 2 (`/idea`) code is written and covered by tests with fake network calls. It has not yet been deployed, and the webhook is not set unless Status is updated to say so. Order matters: push the removal of `getUpdates` before setting the webhook.
-- **Next:** deploy `/idea`, check the first combined digest, then watch whether the daily schedule stays within the Gemini quota.
+- Phase 2 (`/idea`) is live: the Worker is deployed and the Telegram webhook is set. Reaction collection and `getUpdates` have been removed from the scheduled jobs.
+- Not yet confirmed: whether `gemini-flash-lite-latest` is available on this key. If it isn't, `/idea` falls back to `gemini-flash-latest` and shares the digests' quota.
+- **Next:** check the first combined digest (the `weekly` post on 2026-11-16), then watch whether the daily schedule and `/idea` stay within the Gemini quota.
 
 ## Roadmap (agreed, not started)
 

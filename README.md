@@ -160,7 +160,7 @@ A source page has to show its events without JavaScript. URLs can use `{month_na
 
 ## Set up /idea
 
-Only needed once, and only after the code without `getUpdates` is live on GitHub.
+This is already done for our bot. These steps are for setting it up again from scratch, and the code on GitHub must not call `getUpdates` before you connect Telegram.
 
 1. Create a free account at <https://cloudflare.com>, then run `npx wrangler login`.
 2. Add the secrets. Each command asks for a value:
@@ -183,13 +183,19 @@ Only needed once, and only after the code without `getUpdates` is live on GitHub
      --data-urlencode 'allowed_updates=["message"]' -d drop_pending_updates=true
    ```
 
+   This tells Telegram to forward messages to the Worker. It only needs to succeed once. Right after a first deploy it can fail with `Failed to resolve host`. If the address works in your own `curl`, wait a few minutes and retry.
+
 To turn `/idea` off, call `https://api.telegram.org/bot<BOT_TOKEN>/deleteWebhook`. After changing anything in `worker/`, run `npx wrangler deploy` again from that folder, because pushing to GitHub doesn't update Cloudflare. To test the Worker, run `node --test` in `worker/`.
 
 ## Run it locally
 
+Secrets for local use live in `.env` in the project folder. Git ignores this file, so it stays on your Mac. Paste each value after its `=`, with no spaces around the `=`. Quotes aren't needed unless a value contains a space or a special character like `$` or `#`.
+
+The bot doesn't read `.env` by itself, so load it into your terminal first:
+
 ```bash
 source .venv/bin/activate
-export GEMINI_API_KEY=...            # Telegram variables aren't needed for --dry-run
+set -a; source .env; set +a          # Telegram variables aren't needed for --dry-run
 python -m bot monthly --dry-run --month 2026-12
 python -m bot weekly --dry-run --today 2026-11-30
 python -m bot status --dry-run       # no Gemini key needed
@@ -205,6 +211,9 @@ pytest -q
 | `TELEGRAM_THREAD_ID` | Posting into the right topic |
 | `GEMINI_MODEL` | Optional, picks a different model |
 | `BOT_DB_PATH` | Optional, uses a different database file |
+| `TELEGRAM_WEBHOOK_SECRET` | Not used by the Python bot. Kept in `.env` for reconnecting Telegram to the Worker |
+
+GitHub Actions and Cloudflare keep their own copies of these secrets, so if you change a value in `.env`, update it there too.
 
 ## Gemini limits
 
@@ -228,6 +237,7 @@ The free tier allowed **20 requests per day per model** for `gemini-3.8-flash` w
 | `0 extracted` for a source | The page probably needs JavaScript | Replace or remove the source |
 | `No source could be processed` | Every source failed | Check the log. The bot deliberately fails instead of posting "nothing found" |
 | Posts land in the wrong topic | `TELEGRAM_THREAD_ID` is missing or wrong | Update the secret. Any message's topic ID can be found with `discover`, after turning `/idea` off |
+| `Failed to resolve host` from `setWebhook` | Telegram can't see a brand new Worker address yet | If the address works in your own `curl`, wait a few minutes and retry |
 | `/idea` does nothing | The webhook isn't set, or the bot isn't an admin | Check `https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo` for errors |
 | `/idea` says it couldn't reach Gemini | Both models failed or took too long | Try again in a minute. It has under 30 seconds to answer |
 
