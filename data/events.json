@@ -1,5 +1,38 @@
 [
  {
+  "title": "Sci-Fi Pop-up Library",
+  "start_date": "2026-05-14",
+  "end_date": "2027-04-11",
+  "time": "10:00 am - 10:00 pm",
+  "venue": "80 Marine Parade Road, Singapore 449269",
+  "price": null,
+  "category": "arts",
+  "url": "https://thesmartlocal.com/read/nlb-sci-fi-pop-up-library-parkway-parade/",
+  "summary": "A thematic sci-fi pop-up library experience presented by the National Library Board."
+ },
+ {
+  "title": "ONE Ocean: Every Action Ripples",
+  "start_date": "2026-05-30",
+  "end_date": "2027-01-03",
+  "time": "10:00 am - 5:00 pm",
+  "venue": "15 Science Centre Rd, Singapore 609081",
+  "price": null,
+  "category": "arts",
+  "url": "https://thesmartlocal.com/read/one-ocean-science-centre-singapore/",
+  "summary": "An interactive exhibition on ocean science and conservation at Science Centre Singapore."
+ },
+ {
+  "title": "Disney Garden of Wonder",
+  "start_date": "2026-06-08",
+  "end_date": "2027-03-14",
+  "time": "10:00 am - 9:00 pm",
+  "venue": "Floral Fantasy, 18 Marina Gardens Drive, Singapore 018953",
+  "price": null,
+  "category": "arts",
+  "url": "https://thesmartlocal.com/read/disney-garden-of-wonder-floral-fantasy/",
+  "summary": "A Disney-themed floral display exhibition hosted at Floral Fantasy."
+ },
+ {
   "title": "Maria Taniguchi: Afterimage",
   "start_date": "2026-07-24",
   "end_date": "2026-11-22",
@@ -132,48 +165,15 @@
   "summary": "An arts and culture program featuring therapeutic musical performances at Tan Tock Seng Hospital."
  },
  {
-  "title": "Celebrate Diwali at Firangi Superstar",
-  "start_date": "2026-11-03",
-  "end_date": "2026-11-09",
-  "time": null,
-  "venue": "Firangi Superstar",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/a-festival-of-flavour-light-celebrate-diwali-at-firangi-superstar/",
-  "summary": "A festive culinary celebration of Diwali featuring special flavours at Firangi Superstar."
- },
- {
-  "title": "Pokémon RUN 30 Singapore Edition",
-  "start_date": "2026-11-04",
-  "end_date": "2026-11-09",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "outdoors",
-  "url": "https://www.thekallang.com.sg/en/update----announcement/pokemon-run-30-singapore-edition.html",
-  "summary": "A themed Pokémon running event held around the Singapore Sports Hub and Kallang precinct."
- },
- {
-  "title": "The Day I Met Me",
-  "start_date": "2026-11-06",
-  "end_date": "2026-11-09",
+  "title": "Aura masterclass by master Terelyn (2 days)",
+  "start_date": "2026-11-07",
+  "end_date": "2026-11-14",
   "time": null,
   "venue": null,
   "price": null,
   "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/the-day-i-met-me/",
-  "summary": "A self-discovery and wellness workshop program."
- },
- {
-  "title": "Cloop Open Wardrobe x Fashion for Cancer at Alma House",
-  "start_date": "2026-11-07",
-  "end_date": "2026-11-09",
-  "time": null,
-  "venue": "Alma House",
-  "price": null,
-  "category": "market",
-  "url": "https://thehoneycombers.com/singapore/event/cloop-open-wardrobe-x-fashion-for-cancer/",
-  "summary": "A sustainable fashion pop-up and charity shopping event at Alma House."
+  "url": "https://thehoneycombers.com/singapore/event/aura-masterclass-by-master-terelyn-2-day-intensive/",
+  "summary": "A two-day intensive masterclass on aura reading and energy healing."
  },
  {
   "title": "SL80: Weish",
@@ -275,11 +275,22 @@
   "summary": "Annual festival screening a selection of French cinema."
  },
  {
+  "title": "BBQ Brew + Beats",
+  "start_date": "2026-11-13",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/bbq-brew-beats-at-the-southern-depot/",
+  "summary": "An evening of barbecue dishes, craft brews, and live music."
+ },
+ {
   "title": "Great Christmas Village at Orchard Road",
   "start_date": "2026-11-13",
   "end_date": "2027-01-03",
   "time": null,
-  "venue": null,
+  "venue": "Orchard Road",
   "price": null,
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/great-christmas-village-at-orchard-road/",
@@ -570,6 +581,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_qotsa",
   "summary": "Rock band Queens of the Stone Age performs a one-night-only concert in Singapore."
+ },
+ {
+  "title": "Gravity",
+  "start_date": "2026-12-04",
+  "end_date": "2026-12-06",
+  "time": "8:00 am - 11:00 pm",
+  "venue": "10 Bayfront Avenue, B1-69/70 The Shoppes, Marina Bay Sands, Singapore 018971",
+  "price": null,
+  "category": "other",
+  "url": "https://thesmartlocal.com/read/gravity-mbs-singapore/",
+  "summary": "A three-day event hosted at Marina Bay Sands."
  },
  {
   "title": "Two Door Cinema Club",
