@@ -88,17 +88,6 @@
   "summary": "Halloween entertainment, pet-friendly activities, and shopping rewards across Frasers Property Malls."
  },
  {
-  "title": "Systems of Seeing, Where Images Gather",
-  "start_date": "2026-10-10",
-  "end_date": "2026-11-10",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/shifting-images-photography-from-singapore-2000-2025-systems-of-seeing-where-images-gather/",
-  "summary": "A photography exhibition exploring visual culture and imagery from Singapore."
- },
- {
   "title": "Ready for Life Festival 2026",
   "start_date": "2026-10-17",
   "end_date": "2026-11-22",
@@ -231,6 +220,17 @@
   "summary": "A wellness and manifestation circle workshop on 11/11."
  },
  {
+  "title": "Audio House 11.11 Sale",
+  "start_date": "2026-11-11",
+  "end_date": "2026-11-22",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "market",
+  "url": "https://thehoneycombers.com/singapore/event/audio-houses-biggest-annual-11-11-sale-returns/",
+  "summary": "The annual 11.11 shopping promotional event by Audio House featuring discounted electronics."
+ },
+ {
   "title": "Lady in Red: Ce La Vi's ladies night",
   "start_date": "2026-11-11",
   "end_date": null,
@@ -246,7 +246,7 @@
   "start_date": "2026-11-12",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "HER Wellness Club",
   "price": null,
   "category": "workshop",
   "url": "https://thehoneycombers.com/singapore/event/ladies-night-at-her-wellness-club-balance-your-energy-with-reiki-sound-2/",
@@ -279,7 +279,7 @@
   "start_date": "2026-11-13",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "The Southern Depot",
   "price": null,
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/bbq-brew-beats-at-the-southern-depot/",
@@ -367,7 +367,7 @@
   "start_date": "2026-11-14",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "Ce La Vi",
   "price": null,
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/a-touch-of-rose-a-pink-hued-party-brunch-above-the-city-at-ce-la-vi-singapore/",
