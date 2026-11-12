@@ -44,6 +44,17 @@
   "summary": "An art exhibition featuring works by contemporary artist Maria Taniguchi."
  },
  {
+  "title": "REINVENTION: ALLPLAY Free Pickleball Courts",
+  "start_date": "2026-08-11",
+  "end_date": "2026-11-22",
+  "time": "7:00 am - 7:00 pm",
+  "venue": "7 Science Park Drive, Singapore 119316",
+  "price": "Free",
+  "category": "outdoors",
+  "url": "https://thesmartlocal.com/read/geneo-free-pickleball-courts/",
+  "summary": "Free public access pickleball courts hosted at Science Park Drive."
+ },
+ {
   "title": "Are You at Risk? Free Lung Cancer Screening by 365CPS",
   "start_date": "2026-08-20",
   "end_date": "2026-11-15",
@@ -187,39 +198,6 @@
   "summary": "A choral performance presenting the story of Matthew Shepard."
  },
  {
-  "title": "My Chemical Romance Live 2026",
-  "start_date": "2026-11-10",
-  "end_date": "2026-11-11",
-  "time": "8pm",
-  "venue": "Singapore Indoor Stadium",
-  "price": "Tickets sold out",
-  "category": "music",
-  "url": "https://www.sistic.com.sg/events/chemical0426",
-  "summary": "American rock band My Chemical Romance performs live in Singapore across two nights."
- },
- {
-  "title": "My Chemical Romance The Black Parade 2026",
-  "start_date": "2026-11-10",
-  "end_date": "2026-11-11",
-  "time": "8pm",
-  "venue": "Singapore Indoor Stadium",
-  "price": "From $148",
-  "category": "music",
-  "url": "https://www.sistic.com.sg/events/chemical0426",
-  "summary": "Pop-punk icons My Chemical Romance bring The Black Parade tour to Singapore."
- },
- {
-  "title": "11/11/2026 Wish-Fulfilling Circle",
-  "start_date": "2026-11-11",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/11-11-2026-wish-fulfilling-circle/",
-  "summary": "A wellness and manifestation circle workshop on 11/11."
- },
- {
   "title": "Audio House 11.11 Sale",
   "start_date": "2026-11-11",
   "end_date": "2026-11-22",
@@ -229,17 +207,6 @@
   "category": "market",
   "url": "https://thehoneycombers.com/singapore/event/audio-houses-biggest-annual-11-11-sale-returns/",
   "summary": "The annual 11.11 shopping promotional event by Audio House featuring discounted electronics."
- },
- {
-  "title": "Lady in Red: Ce La Vi's ladies night",
-  "start_date": "2026-11-11",
-  "end_date": null,
-  "time": null,
-  "venue": "Ce La Vi",
-  "price": null,
-  "category": "nightlife",
-  "url": "https://thehoneycombers.com/singapore/event/lady-in-red-ce-la-vis-ladies-night-gets-a-fiery-anniversary-makeover/",
-  "summary": "Ce La Vi's ladies night celebrates its anniversary with a fiery red-themed evening."
  },
  {
   "title": "Ladies’ Night at HER Wellness Club: Reiki & Sound",
@@ -264,6 +231,17 @@
   "summary": "A festive Christmas shopping atelier featuring holiday retail and artisanal goods."
  },
  {
+  "title": "The House on the Moon 《明月共此时》by Nelson Yeo",
+  "start_date": "2026-11-12",
+  "end_date": "2026-12-12",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/the-house-on-the-moon-nelson-yeo/",
+  "summary": "An art exhibition and filmic installation created by filmmaker Nelson Yeo."
+ },
+ {
   "title": "vOilah! French Film Festival 2026",
   "start_date": "2026-11-12",
   "end_date": "2026-11-29",
@@ -284,6 +262,17 @@
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/bbq-brew-beats-at-the-southern-depot/",
   "summary": "An evening of barbecue dishes, craft brews, and live music."
+ },
+ {
+  "title": "Christmas with Peanuts at Frasers Property SG malls!",
+  "start_date": "2026-11-13",
+  "end_date": "2026-12-31",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "festival",
+  "url": "https://thehoneycombers.com/singapore/event/a-happy-jolly-christmas-with-peanuts-at-the-malls-of-frasers-property-singapore/",
+  "summary": "A Peanuts-themed Christmas celebration hosted across Frasers Property shopping malls."
  },
  {
   "title": "Great Christmas Village at Orchard Road",
@@ -394,6 +383,17 @@
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/festive-tree-decoration-gardens-a-glow-2026/",
   "summary": "A festive holiday celebration featuring illuminated tree displays."
+ },
+ {
+  "title": "Improv Taster Sessions",
+  "start_date": "2026-11-14",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/improv-taster-sessions-2/",
+  "summary": "A introductory workshop exploring the basics of improvisational theatre."
  },
  {
   "title": "New Everyday Life, By Design Quest",
