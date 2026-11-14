@@ -231,17 +231,6 @@
   "summary": "Annual festival screening a selection of French cinema."
  },
  {
-  "title": "BBQ Brew + Beats",
-  "start_date": "2026-11-13",
-  "end_date": null,
-  "time": null,
-  "venue": "The Southern Depot",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/bbq-brew-beats-at-the-southern-depot/",
-  "summary": "An evening of barbecue dishes, craft brews, and live music."
- },
- {
   "title": "Christmas with Peanuts at Frasers Property SG malls!",
   "start_date": "2026-11-13",
   "end_date": "2026-12-31",
@@ -262,6 +251,17 @@
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/great-christmas-village-at-orchard-road/",
   "summary": "A festive Christmas village along Orchard Road with seasonal attractions."
+ },
+ {
+  "title": "Merry Moments With Mochiak & AhWoo",
+  "start_date": "2026-11-13",
+  "end_date": "2027-01-03",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "festival",
+  "url": "https://thehoneycombers.com/singapore/event/mochiak-ahwoo-bring-cosy-festive-magic-to-lendlease-malls/",
+  "summary": "Festive installations and holiday activities featuring Mochiak & AhWoo across Lendlease malls."
  },
  {
   "title": "Mizuho Blue Challenge - The Kallang Football Series",
@@ -297,17 +297,6 @@
   "summary": "An arts and culture festival celebrating the unconventional and strange."
  },
  {
-  "title": "The Podcast Reality Check",
-  "start_date": "2026-11-13",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/the-podcast-reality-check-what-we-wish-we-knew-before-starting/",
-  "summary": "A workshop offering practical insights into starting and running a podcast."
- },
- {
   "title": "Thrive@Libraries 2026",
   "start_date": "2026-11-13",
   "end_date": "2026-11-15",
@@ -317,17 +306,6 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/thrivelibraries-2026-permission-to-pause/",
   "summary": "A library programme focused on wellness, reflection, and personal growth."
- },
- {
-  "title": "Touch Grass: The Anti-Screen Social",
-  "start_date": "2026-11-13",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/touch-grass-the-anti-screen-social/",
-  "summary": "A social gathering encouraging guests to unplug and connect over food and drinks."
  },
  {
   "title": "A Touch of Rose: Ce La Vi Singapore brunch",
@@ -449,6 +427,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_5sos",
   "summary": "Australian alt-rock band 5 Seconds of Summer returns to Singapore for a two-night tour."
+ },
+ {
+  "title": "LQV Singapore’s 10th anniversary week",
+  "start_date": "2026-11-16",
+  "end_date": "2026-11-20",
+  "time": null,
+  "venue": "LQV Singapore",
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/lqv-singapore-celebrates-10-years-with-anniversary-wines-pintxos-and-a-soiree/",
+  "summary": "A week-long 10th anniversary celebration featuring special wines, pintxos, and a soiree."
  },
  {
   "title": "Joji: Solaris Tour",
