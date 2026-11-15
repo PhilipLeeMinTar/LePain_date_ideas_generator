@@ -66,17 +66,6 @@
   "summary": "A free community health screening for lung cancer organized by 365 Cancer Prevention Society."
  },
  {
-  "title": "Free Breast Cancer Screening for Women of all Ages",
-  "start_date": "2026-08-27",
-  "end_date": "2026-11-14",
-  "time": null,
-  "venue": null,
-  "price": "Free",
-  "category": "other",
-  "url": "https://thehoneycombers.com/singapore/event/free-breast-cancer-screening-for-women-of-all-ages/",
-  "summary": "A public health initiative providing free breast cancer screenings for women."
- },
- {
   "title": "Endless Breakfast at Allora",
   "start_date": "2026-09-20",
   "end_date": "2026-11-29",
@@ -154,17 +143,6 @@
   "summary": "An arts and culture program featuring therapeutic musical performances at Tan Tock Seng Hospital."
  },
  {
-  "title": "Aura masterclass by master Terelyn (2 days)",
-  "start_date": "2026-11-07",
-  "end_date": "2026-11-14",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/aura-masterclass-by-master-terelyn-2-day-intensive/",
-  "summary": "A two-day intensive masterclass on aura reading and energy healing."
- },
- {
   "title": "SL80: Weish",
   "start_date": "2026-11-07",
   "end_date": "2026-11-21",
@@ -196,17 +174,6 @@
   "category": "market",
   "url": "https://thehoneycombers.com/singapore/event/audio-houses-biggest-annual-11-11-sale-returns/",
   "summary": "The annual 11.11 shopping promotional event by Audio House featuring discounted electronics."
- },
- {
-  "title": "The Christmas Atelier",
-  "start_date": "2026-11-12",
-  "end_date": "2026-11-14",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "market",
-  "url": "https://thehoneycombers.com/singapore/event/the-christmas-atelier-2026/",
-  "summary": "A festive Christmas shopping atelier featuring holiday retail and artisanal goods."
  },
  {
   "title": "The House on the Moon 《明月共此时》by Nelson Yeo",
@@ -268,7 +235,7 @@
   "start_date": "2026-11-13",
   "end_date": "2026-11-17",
   "time": null,
-  "venue": null,
+  "venue": "Kallang",
   "price": null,
   "category": "outdoors",
   "url": "https://thehoneycombers.com/singapore/event/mizuho-blue-challenge-the-kallang-football-series-singapore/",
@@ -308,28 +275,6 @@
   "summary": "A library programme focused on wellness, reflection, and personal growth."
  },
  {
-  "title": "A Touch of Rose: Ce La Vi Singapore brunch",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": "Ce La Vi",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/a-touch-of-rose-a-pink-hued-party-brunch-above-the-city-at-ce-la-vi-singapore/",
-  "summary": "A pink-themed rooftop party brunch at Ce La Vi Singapore."
- },
- {
-  "title": "Book Tour of 1,000 years of Sejarah Melayu",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/book-tour-of-1000-years-of-sejarah-melayu-by-mr-sarafian/",
-  "summary": "An author-led book tour delving into the rich history of Sejarah Melayu."
- },
- {
   "title": "Festive Tree Decoration: Gardens-A-Glow 2026",
   "start_date": "2026-11-14",
   "end_date": "2026-11-29",
@@ -339,50 +284,6 @@
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/festive-tree-decoration-gardens-a-glow-2026/",
   "summary": "A festive holiday celebration featuring illuminated tree displays."
- },
- {
-  "title": "Improv Taster Sessions",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/improv-taster-sessions-2/",
-  "summary": "A introductory workshop exploring the basics of improvisational theatre."
- },
- {
-  "title": "New Everyday Life, By Design Quest",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/new-everyday-life-by-design-nelbd-quest/",
-  "summary": "An interactive design exploration quest examining everyday life."
- },
- {
-  "title": "The Resting Room",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/the-resting-room-by-future-resonance-x-heveya/",
-  "summary": "A sensory wellness and artistic space designed for mindful rest."
- },
- {
-  "title": "Walk for Joy",
-  "start_date": "2026-11-14",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "outdoors",
-  "url": "https://thehoneycombers.com/singapore/event/walk-for-joy-2026/",
-  "summary": "A community walking event promoting fitness and mental well-being."
  },
  {
   "title": "Everland: The Launch Show",
@@ -438,6 +339,105 @@
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/lqv-singapore-celebrates-10-years-with-anniversary-wines-pintxos-and-a-soiree/",
   "summary": "A week-long 10th anniversary celebration featuring special wines, pintxos, and a soiree."
+ },
+ {
+  "title": "Unwrap this season with family-friendly activities!",
+  "start_date": "2026-11-16",
+  "end_date": "2026-12-31",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "other",
+  "url": "https://thehoneycombers.com/singapore/event/downtown-east-celebrates-christmas-with-a-sweet-line-up-of-festive-experiences-for-all-ages/",
+  "summary": "Downtown East celebrates Christmas with a lineup of festive family experiences."
+ },
+ {
+  "title": "Kefir making workshop (Mandarin)",
+  "start_date": "2026-11-17",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/nourishing-food-experience-kefir-making-mandarin-session/",
+  "summary": "A hands-on workshop conducted in Mandarin on making nourishing kefir."
+ },
+ {
+  "title": "不准讓愛壞掉！EP Launch Show",
+  "start_date": "2026-11-17",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/shelby-wang-ep-launch-show/",
+  "summary": "Shelby Wang performs live in an EP launch showcase."
+ },
+ {
+  "title": "Improv Taster Sessions",
+  "start_date": "2026-11-18",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/improv-taster-sessions-3/",
+  "summary": "An introductory taster workshop to learn the basics of improvisational theatre."
+ },
+ {
+  "title": "Playwrights’ Cove 2026: From Page to Stage",
+  "start_date": "2026-11-19",
+  "end_date": "2026-11-22",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/the-necessary-stages-playwrights-cove-2026-from-page-to-stage/",
+  "summary": "A theatre showcase presenting new works developed under The Necessary Stage's Playwrights' Cove."
+ },
+ {
+  "title": "Senses V: How Much Do You Really Notice?",
+  "start_date": "2026-11-19",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/senses-v-how-much-do-you-really-notice/",
+  "summary": "An interactive experiential workshop testing perception and sensory awareness."
+ },
+ {
+  "title": "Vender Bar takes over Ce La Vi Singapore Sky Bar",
+  "start_date": "2026-11-19",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "nightlife",
+  "url": "https://thehoneycombers.com/singapore/event/vender-bar-takes-over-ce-la-vi-singapore-for-a-one-night-cocktail-celebration/",
+  "summary": "A one-night bar takeover and cocktail celebration at Ce La Vi Singapore Sky Bar."
+ },
+ {
+  "title": "River of Luck!",
+  "start_date": "2026-11-20",
+  "end_date": "2027-01-31",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/river-of-luck/",
+  "summary": "An arts and cultural celebration installation themed around prosperity and luck."
+ },
+ {
+  "title": "Energy defence crystals appreciation class",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/energy-defence-crystals-appreciation-class-with-sodo-atelier/",
+  "summary": "A crystal appreciation and energy defence workshop hosted with Sodo Atelier."
  },
  {
   "title": "Joji: Solaris Tour",
