@@ -16,10 +16,12 @@ class TelegramError(RuntimeError):
 
 
 class Telegram:
-    def __init__(self, token: str, chat_id: str, thread_id: int | None, dry_run: bool = False):
+    def __init__(self, token: str, chat_id: str, thread_id: int | None, dry_run: bool = False,
+                 log_thread_id: int | None = None):
         self.base = f"https://api.telegram.org/bot{token}"
         self.chat_id = chat_id
         self.thread_id = thread_id
+        self.log_thread_id = log_thread_id
         self.dry_run = dry_run
         self._fake_id = 0
 
@@ -39,11 +41,24 @@ class Telegram:
 
     def send(self, html: str) -> int:
         """Post an HTML-formatted message to the topic. Returns the message id."""
+        return self._send(html, self.thread_id, silent=False, label="message")
+
+    def log(self, html: str) -> None:
+        """Quiet "ran OK" check-in: sent silently to the Bot log topic, never to Date Ideas.
+
+        Without a log topic configured it only goes to the run log.
+        """
+        if not self.log_thread_id:
+            log.info("check-in (no log topic set): %s", html)
+            return
+        self._send(html, self.log_thread_id, silent=True, label="check-in")
+
+    def _send(self, html: str, thread_id: int | None, silent: bool, label: str) -> int:
         if len(html) > MAX_LEN:
             html = html[: MAX_LEN - 1] + "…"
         if self.dry_run:
             self._fake_id += 1
-            print(f"\n----- [dry run] message #{self._fake_id} -----\n{html}\n")
+            print(f"\n----- [dry run] {label} #{self._fake_id} -----\n{html}\n")
             return -self._fake_id
         payload: dict[str, Any] = {
             "chat_id": self.chat_id,
@@ -51,8 +66,10 @@ class Telegram:
             "parse_mode": "HTML",
             "link_preview_options": {"is_disabled": True},
         }
-        if self.thread_id:
-            payload["message_thread_id"] = self.thread_id
+        if thread_id:
+            payload["message_thread_id"] = thread_id
+        if silent:
+            payload["disable_notification"] = True
         msg = self._call("sendMessage", payload)
         time.sleep(1)  # stay well under group rate limits
         return int(msg["message_id"])

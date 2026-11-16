@@ -2,17 +2,17 @@ name: date-ideas-bot
 
 on:
   schedule:
-    # GitHub cron is in UTC. Singapore is UTC+8. Runs can start a few minutes (sometimes ~1h) late.
-    - cron: "0 11 25 * *"   # monthly lineup: 25th, 7pm SGT
-    - cron: "0 11 * * 1"    # weekly update: Monday, 7pm SGT
-    - cron: "0 1 * * *"     # daily: reactions + ticket alerts, 9am SGT
+    # GitHub cron is in UTC. Singapore is UTC+8. Runs often start hours late, and GitHub
+    # sometimes drops them entirely, so there is one daily run (`auto`) that also posts the
+    # weekly update (Mondays) and monthly lineup (25th), catching up any it missed.
+    - cron: "0 1 * * *"     # 9am SGT
   workflow_dispatch:
     inputs:
       job:
         description: Which job to run
         type: choice
-        options: [daily, weekly, monthly, status]
-        default: daily
+        options: [auto, daily, weekly, monthly, status]
+        default: auto
       dry_run:
         description: Print messages in the log instead of posting (DB changes are not saved). Ignored by status, which always posts.
         type: boolean
@@ -53,9 +53,7 @@ jobs:
           INPUT_MONTH: ${{ inputs.month }}
         run: |
           case "$SCHEDULE" in
-            "0 11 25 * *") JOB=monthly ;;
-            "0 11 * * 1")  JOB=weekly ;;
-            "0 1 * * *")   JOB=daily ;;
+            "0 1 * * *")   JOB=auto ;;
             *)             JOB="$INPUT_JOB" ;;
           esac
           ARGS="$JOB"
@@ -69,6 +67,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
+          TELEGRAM_LOG_THREAD_ID: ${{ secrets.TELEGRAM_LOG_THREAD_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
         run: python -m bot ${{ steps.pick.outputs.args }}

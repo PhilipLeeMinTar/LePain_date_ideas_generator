@@ -14,10 +14,14 @@ from bot.sources import Source, expand
 class FakeTG:
     def __init__(self):
         self.sent: list[str] = []
+        self.logged: list[str] = []  # quiet check-ins to the Bot log topic
 
     def send(self, html: str) -> int:
         self.sent.append(html)
         return 1000 + len(self.sent)
+
+    def log(self, html: str) -> None:
+        self.logged.append(html)
 
 
 class FakeLLM:
@@ -161,7 +165,8 @@ def test_monthly_posts_header_and_picks_then_weekly_skips_them():
     ctx.today = date(2026, 11, 30)
     ctx.tg.sent.clear()
     jobs.weekly(ctx)
-    assert ctx.tg.sent == [fmt.nothing_new()]
+    assert ctx.tg.sent == []  # Date Ideas stays clean
+    assert ctx.tg.logged == [fmt.nothing_new()]
 
 
 def test_weekly_posts_only_newly_found_events():
@@ -186,9 +191,37 @@ def test_daily_sends_ticket_alert_once_for_future_month():
     jobs.daily(ctx)
     alerts = [m for m in ctx.tg.sent if "Ticket sales coming up" in m]
     assert len(alerts) == 1 and "Far Concert" in alerts[0]
+    assert ctx.tg.logged == []  # the alert itself shows the run worked
     ctx.tg.sent.clear()
     jobs.daily(ctx)
     assert ctx.tg.sent == []  # not repeated
+    assert ctx.tg.logged == [fmt.daily_checkin(0)]  # quiet check-in instead
+
+
+def test_daily_checkin_counts_new_events():
+    ctx = make_ctx(date(2026, 11, 9), {"Src": [{"title": "Supper Club", "start_date": "2026-11-20", "category": "food"}]})
+    jobs.daily(ctx)
+    assert ctx.tg.sent == []
+    assert ctx.tg.logged == [fmt.daily_checkin(1)]
+    assert "1 new event saved" in ctx.tg.logged[0]
+
+
+def test_log_without_topic_never_posts_to_group(monkeypatch):
+    from bot.telegram import Telegram
+    tg = Telegram("t", "c", 7)
+    monkeypatch.setattr(tg, "_call", lambda *a, **k: pytest.fail("should not call Telegram"))
+    tg.log("hi")
+
+
+def test_log_sends_silently_to_log_topic(monkeypatch):
+    from bot.telegram import Telegram
+    import bot.telegram as tgmod
+    tg = Telegram("t", "c", 7, log_thread_id=99)
+    calls = []
+    monkeypatch.setattr(tg, "_call", lambda m, p, **k: calls.append(p) or {"message_id": 1})
+    monkeypatch.setattr(tgmod.time, "sleep", lambda s: None)
+    tg.log("hi")
+    assert calls[0]["message_thread_id"] == 99 and calls[0]["disable_notification"] is True
 
 
 def _add_reaction(db, message_id, user_id, emoji):
@@ -264,6 +297,65 @@ def test_monthly_with_nothing_found():
     ctx = make_ctx(date(2026, 11, 25), {"Src": []}, pick_all=False)
     jobs.monthly(ctx)
     assert len(ctx.tg.sent) == 1 and "couldn't find" in ctx.tg.sent[0]
+
+
+# ------------------------------------------------------------------ auto (catch-up)
+def _monthly_posts(ctx):
+    return [m for m in ctx.tg.sent if "Date ideas for" in m]
+
+
+def test_auto_posts_monthly_on_25th_once():
+    ctx = make_ctx(date(2026, 11, 25), DEC_EVENTS)
+    jobs.auto(ctx)
+    assert len(_monthly_posts(ctx)) == 1 and "December 2026" in ctx.tg.sent[-1]
+    ctx.today = date(2026, 11, 26)
+    ctx.tg.sent.clear()
+    jobs.auto(ctx)
+    assert _monthly_posts(ctx) == []  # not repeated
+
+
+def test_auto_catches_up_missed_monthly():
+    ctx = make_ctx(date(2026, 11, 24), DEC_EVENTS)
+    ctx.db.set_meta(jobs.WEEKLY_DONE, "2026-11-23")
+    jobs.auto(ctx)
+    assert _monthly_posts(ctx) == []  # not due before the 25th
+    ctx.today = date(2026, 11, 27)  # 25th and 26th runs were dropped
+    jobs.auto(ctx)
+    assert len(_monthly_posts(ctx)) == 1
+
+
+def test_auto_runs_weekly_on_monday_and_catches_up_once():
+    ctx = make_ctx(date(2026, 11, 16), {"Src": []})
+    ctx.db.set_meta(jobs.WEEKLY_DONE, "2026-11-09")
+    jobs.auto(ctx)
+    assert fmt.nothing_new() in ctx.tg.logged
+    ctx.tg.logged.clear()
+    ctx.today = date(2026, 11, 17)
+    jobs.auto(ctx)
+    assert fmt.nothing_new() not in ctx.tg.logged  # already done this week
+
+    # Next Monday's run is dropped: Tuesday catches up
+    ctx.db.set_meta(jobs.WEEKLY_DONE, "2026-11-16")
+    ctx.today = date(2026, 11, 24)
+    jobs.auto(ctx)
+    assert fmt.nothing_new() in ctx.tg.logged
+
+
+def test_auto_does_not_rerun_weekly_midweek():
+    ctx = make_ctx(date(2026, 11, 19), {"Src": []})
+    ctx.db.set_meta(jobs.WEEKLY_DONE, "2026-11-16")
+    jobs.auto(ctx)
+    assert ctx.tg.logged == [fmt.daily_checkin(0)]
+
+
+def test_auto_monthly_then_weekly_on_monday_25th():
+    # 25 Jan 2027 is a Monday: the lineup goes out, the weekly update is skipped and counted as done
+    ctx = make_ctx(date(2027, 1, 25), {"Src": [{"title": "Feb Gig", "start_date": "2027-02-10", "category": "music"}]})
+    ctx.db.set_meta(jobs.WEEKLY_DONE, "2027-01-18")
+    jobs.auto(ctx)
+    assert len(_monthly_posts(ctx)) == 1 and "Feb Gig" in ctx.tg.sent[0]
+    assert fmt.nothing_new() not in ctx.tg.logged
+    assert not jobs.weekly_due(ctx)
 
 
 # ------------------------------------------------------------------ status

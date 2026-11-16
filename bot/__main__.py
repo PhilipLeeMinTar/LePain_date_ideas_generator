@@ -1,5 +1,6 @@
 """CLI entry point.
 
+  python -m bot auto                        # scheduled: daily, plus weekly/monthly when due
   python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD]
   python -m bot monthly --month 2026-11     # post a lineup for a specific month
   python -m bot status [--dry-run]          # post a database summary (no Gemini calls)
@@ -88,7 +89,7 @@ def discover() -> None:
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bot")
-    p.add_argument("job", choices=["daily", "weekly", "monthly", "status", "discover"])
+    p.add_argument("job", choices=["auto", "daily", "weekly", "monthly", "status", "discover"])
     p.add_argument("--dry-run", action="store_true", help="print messages instead of posting; don't touch the real DB")
     p.add_argument("--today", help="pretend today is YYYY-MM-DD (testing)")
     p.add_argument("--month", help="monthly only: post the lineup for YYYY-MM instead of next month")
@@ -112,7 +113,8 @@ def main(argv: list[str] | None = None) -> None:
 
     today = date.fromisoformat(args.today) if args.today else datetime.now(TZ).date()
     db = DB(db_path)
-    tg = Telegram(settings.telegram_token, settings.chat_id, settings.thread_id, dry_run=args.dry_run)
+    tg = Telegram(settings.telegram_token, settings.chat_id, settings.thread_id, dry_run=args.dry_run,
+                  log_thread_id=settings.log_thread_id)
     try:
         if args.job == "status":
             jobs.status(db, tg, today)
@@ -129,6 +131,8 @@ def main(argv: list[str] | None = None) -> None:
             jobs.monthly(ctx, month)
         elif args.job == "weekly":
             jobs.weekly(ctx)
+        elif args.job == "auto":
+            jobs.auto(ctx)
         else:
             jobs.daily(ctx)
     finally:

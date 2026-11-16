@@ -47,6 +47,7 @@ class Settings:
     db_path: Path
     taste_profile_path: Path
     dry_run: bool = False
+    log_thread_id: int | None = None  # quiet "ran OK" check-ins (Bot log topic)
 
     @classmethod
     def from_env(cls, dry_run: bool = False, need_gemini: bool = True) -> "Settings":
@@ -58,6 +59,7 @@ class Settings:
 
         # Dry runs print instead of posting, so Telegram secrets are optional there.
         thread = env("TELEGRAM_THREAD_ID", False)
+        log_thread = env("TELEGRAM_LOG_THREAD_ID", False)
         return cls(
             telegram_token=env("TELEGRAM_BOT_TOKEN", not dry_run),
             chat_id=env("TELEGRAM_CHAT_ID", not dry_run),
@@ -67,4 +69,5 @@ class Settings:
             db_path=Path(os.environ.get("BOT_DB_PATH", ROOT / "data" / "bot.db")),
             taste_profile_path=ROOT / "taste_profile.md",
             dry_run=dry_run,
+            log_thread_id=int(log_thread) if log_thread else None,
         )

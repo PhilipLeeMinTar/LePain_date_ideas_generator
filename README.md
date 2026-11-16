@@ -8,11 +8,13 @@ It costs nothing to run. GitHub Actions wakes it up on a schedule, Google Gemini
 
 | Job | When (SGT) | What you see in the group |
 |---|---|---|
-| `monthly` | 25th, 7pm | One message with the top 10–15 picks for **next** month |
-| `weekly` | Mondays, 7pm | One message with up to 5 newly found picks, or "nothing new this week". Skipped on the 25th |
-| `daily` | 9am | Usually nothing. Posts one 🎟️ message when tickets are about to go on sale for an event in a later month |
+| `monthly` | 25th | One message with the top 10–15 picks for **next** month |
+| `weekly` | Mondays | One message with up to 5 newly found picks. If there are none, a quiet "nothing new this week" goes to the Bot log topic. Skipped on the 25th |
+| `daily` | Every day | Usually nothing in Date Ideas. Posts one 🎟️ message when tickets are about to go on sale for an event in a later month, otherwise a quiet "ran OK" check-in in Bot log |
 | `status` | Only when you run it | A summary of the database and today's Gemini usage |
 | `/idea` | When you type it in the group | Up to 5 stored events that fit what you asked for |
+
+There is only one schedule: a daily run (`auto`) at 9am SGT, which GitHub often starts hours late. It does the daily job, then the monthly lineup from the 25th and the weekly update from Monday, unless they've already gone out. GitHub sometimes drops scheduled runs entirely, so a missed digest goes out on the next day that runs.
 
 A monthly or weekly post looks like this, and each one is a single notification:
 
@@ -92,6 +94,7 @@ The database has five tables: `events`, `reactions`, `alerts` (ticket alerts alr
    | `TELEGRAM_BOT_TOKEN` | From BotFather |
    | `TELEGRAM_CHAT_ID` | e.g. `-1001234567890` |
    | `TELEGRAM_THREAD_ID` | The Date Ideas topic ID. If it's blank, posts won't go to that topic |
+   | `TELEGRAM_LOG_THREAD_ID` | Optional. A muted "Bot log" topic for quiet "ran OK" check-ins when the daily/weekly runs have nothing to post |
    | `GEMINI_API_KEY` | From AI Studio |
 
    Optional: under the *Variables* tab, set `GEMINI_MODEL` to pin a model. The default is `gemini-flash-latest`.
@@ -221,7 +224,7 @@ The free tier allowed **20 requests per day per model** for `gemini-3.8-flash` w
 
 - Each source costs 1 request and each ranking costs 1. With 5 sources, a normal day uses about 5.
 - Each `/idea` costs 1 request on Flash-Lite, so it doesn't eat into the digests' quota. It only falls back to the main Flash model if Flash-Lite fails.
-- A source that succeeded today is remembered and skipped. The evening `weekly` or `monthly` job reuses the morning's scrape, and a rerun only retries what failed.
+- A source that succeeded today is remembered and skipped. A manual `weekly` or `monthly` run later the same day reuses that day's scrape, and a rerun only retries what failed.
 - Google has no way to look up remaining quota, so `status` shows the bot's own count. Limits are learned from Google's quota errors.
 - Dry runs use real requests but aren't counted, because a dry run doesn't save the database. [AI Studio](https://ai.dev/rate-limit) has the official numbers.
 

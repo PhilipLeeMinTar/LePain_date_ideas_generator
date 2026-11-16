@@ -1,4 +1,4 @@
-"""The three scheduled jobs: monthly lineup, weekly update, daily housekeeping."""
+"""The scheduled jobs: monthly lineup, weekly update, daily housekeeping, and `auto` that runs whichever are due."""
 from __future__ import annotations
 
 import json
@@ -23,6 +23,10 @@ from .sources import SOURCES, Source, expand
 from .telegram import Telegram
 
 log = logging.getLogger(__name__)
+
+# meta keys used by the catch-up rule in auto()
+MONTHLY_DONE = "monthly_done"  # first day of the last month whose lineup went out
+WEEKLY_DONE = "weekly_done"    # date the weekly update last ran
 
 
 @dataclass
@@ -127,12 +131,15 @@ def monthly(ctx: Ctx, month: date | None = None) -> None:
     else:
         ctx.tg.send(f"📆 <b>Date ideas for {month_label(month)}</b>\nI couldn't find anything good yet. I'll keep looking every week.")
     ctx.db.mark_reviewed([e.key for e in candidates])
+    ctx.db.set_meta(MONTHLY_DONE, month.isoformat())
     ctx.db.commit()
 
 
 def weekly(ctx: Ctx) -> None:
     if ctx.today.day == 25:
         log.info("25th: the monthly lineup goes out today, skipping the weekly update")
+        ctx.db.set_meta(WEEKLY_DONE, ctx.today.isoformat())
+        ctx.db.commit()
         return
     months = weekly_target_months(ctx.today)
     refresh(ctx, months)
@@ -150,20 +157,50 @@ def weekly(ctx: Ctx) -> None:
     if picks:
         _post_digest(ctx, fmt.weekly_header(len(picks)), candidates, picks)
     else:
-        ctx.tg.send(fmt.nothing_new())
+        ctx.tg.log(fmt.nothing_new())  # quiet check-in: keep Date Ideas for real picks
     ctx.db.mark_reviewed([e.key for e in candidates])
+    ctx.db.set_meta(WEEKLY_DONE, ctx.today.isoformat())
     ctx.db.commit()
 
 
 def daily(ctx: Ctx) -> None:
-    refresh(ctx, [month_start(ctx.today), next_month(ctx.today)])
+    new_events = refresh(ctx, [month_start(ctx.today), next_month(ctx.today)])
     alerts = ctx.db.upcoming_ticket_sales(ctx.today, exclude_months=weekly_target_months(ctx.today))
     log.info("daily: %d new ticket sale alerts", len(alerts))
     if alerts:
         for msg in fmt.ticket_alert(alerts):
             ctx.tg.send(msg)
         ctx.db.mark_alerted([e.key for e in alerts])
+    else:
+        ctx.tg.log(fmt.daily_checkin(new_events))
     ctx.db.commit()
+
+
+def monthly_due(ctx: Ctx) -> bool:
+    """From the 25th, until next month's lineup has gone out (catches up a missed run)."""
+    return ctx.today.day >= 25 and ctx.db.get_meta(MONTHLY_DONE) != monthly_target_month(ctx.today).isoformat()
+
+
+def weekly_due(ctx: Ctx) -> bool:
+    """Until the weekly update has run on or after this week's Monday (catches up a missed run)."""
+    monday = ctx.today - timedelta(days=ctx.today.weekday())
+    last = parse_iso(ctx.db.get_meta(WEEKLY_DONE))
+    return last is None or last < monday
+
+
+def auto(ctx: Ctx) -> None:
+    """The one scheduled run: daily housekeeping, plus any digest that is due.
+
+    GitHub sometimes drops scheduled runs, so the digests ride on the daily run and
+    a missed one goes out on the next day that runs.
+    """
+    daily(ctx)
+    if monthly_due(ctx):  # before weekly, so weekly doesn't take the month's new events
+        log.info("auto: monthly lineup is due")
+        monthly(ctx)
+    if weekly_due(ctx):
+        log.info("auto: weekly update is due")
+        weekly(ctx)
 
 
 def status(db: DB, tg: Telegram, today: date) -> None:

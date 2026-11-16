@@ -19,13 +19,17 @@ Scheduled posts run on **GitHub Actions cron jobs**, and the `/idea` command run
 
 ## Schedule (SGT = UTC+8; cron in `.github/workflows/bot.yml` is UTC)
 
+There is **one cron**: daily 9am SGT (`0 1 * * *`), which runs `auto`. GitHub started those runs ~6h late and silently dropped both Monday 7pm weekly crons in Nov 2026, so the digests ride on the daily run. `auto` runs `daily`, then `monthly` if `monthly_due` (from the 25th until `meta.monthly_done` equals next month), then `weekly` if `weekly_due` (`meta.weekly_done` is before this week's Monday). A dropped run is caught up the next day. Monthly goes before weekly so weekly doesn't take the month's new events.
+
 | Job | When | Behaviour |
 |---|---|---|
-| `monthly` | 25th, 7pm | Top 10–15 picks for **next** month, as one combined message (name, date/time, link) |
-| `weekly` | Mondays, 7pm | Newly found events for the current month (plus next month from the 25th onward). Max 5. Posts "nothing new this week" if there are none. Skips the 25th |
-| `daily` | 9am | Refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once |
+| `monthly` | 25th (or the first run after) | Top 10–15 picks for **next** month, as one combined message (name, date/time, link) |
+| `weekly` | Mondays (or the first run after) | Newly found events for the current month (plus next month from the 25th onward). Max 5. If there are none, sends a quiet "nothing new this week" check-in to the Bot log topic. Skips the 25th |
+| `daily` | Every run | Refreshes events, posts one batched 🎟️ alert for ticket sale dates of events **outside** the months the digests cover. Each event is alerted once. With no alerts, sends a quiet "ran OK" check-in to the Bot log topic |
 
 `status` is manual-only: it posts a database and Gemini usage summary. `/idea <request>` is typed in the group and answered by the Worker.
+
+Check-ins (`Telegram.log`) go silently to a separate muted **Bot log** topic (`TELEGRAM_LOG_THREAD_ID`), never to Date Ideas; if that secret is unset they only go to the run log. A missing daily check-in means GitHub didn't start the run. The monthly job still posts "couldn't find anything" in Date Ideas.
 
 New posts are always new messages. Existing messages are never edited (the owner's choice). The owner asked for one combined message per digest, because one message per event felt like spam.
 
@@ -37,10 +41,10 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   → llm.GeminiLLM.rank (taste_profile.md + liked/disliked from older reactions) → formatting.digest → telegram.send
 ```
 
-- `bot/__main__.py`: CLI. `python -m bot daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids) and `python -m bot status` (manual-only database summary with no Gemini calls; in the workflow it ignores `dry_run` and always posts).
-- `bot/jobs.py`: the three scheduled jobs and `status`, plus `refresh()` and `export_events()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
+- `bot/__main__.py`: CLI. `python -m bot auto|daily|weekly|monthly [--dry-run] [--today YYYY-MM-DD] [--month YYYY-MM]`, plus `python -m bot discover` (setup helper that prints chat and thread ids) and `python -m bot status` (manual-only database summary with no Gemini calls; in the workflow it ignores `dry_run` and always posts).
+- `bot/jobs.py`: the three jobs, `auto` (the scheduled entry point, with the catch-up rule) and `status`, plus `refresh()` and `export_events()`. `Ctx` holds the dependencies (db, tg, llm, fetch, sources) so tests can inject fakes.
   - `refresh()` remembers each source that succeeded today (`scraped:<url>` in `meta`), so reruns and the evening digests skip them. Pages that are down, blocked or almost empty (under `MIN_PAGE_CHARS`) are skipped before any Gemini request.
-- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `gemini_usage`, `meta` (stores `scraped:<url>` and learned `gemini_daily_limit:<model>` values).
+- `bot/db.py`: SQLite tables `events`, `reactions`, `alerts`, `gemini_usage`, `meta` (stores `scraped:<url>`, `monthly_done`, `weekly_done` and learned `gemini_daily_limit:<model>` values).
   - Event key = sha1 of the normalized title (years and filler words stripped) plus start date.
   - Upserts only fill in missing fields.
   - An event moves through `reviewed_at` → `posted_at`/`message_id`. "Reviewed" means a digest already considered it, so the weekly job only looks at genuinely new events.
@@ -67,7 +71,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 
 ## GitHub setup
 
-- Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_THREAD_ID`, `GEMINI_API_KEY` (free AI Studio key, no billing).
+- Secrets: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `TELEGRAM_THREAD_ID`, `TELEGRAM_LOG_THREAD_ID` (optional, Bot log topic), `GEMINI_API_KEY` (free AI Studio key, no billing).
 - Optional repo variable: `GEMINI_MODEL` (default `gemini-flash-latest`).
 - Manual runs: Actions → date-ideas-bot → Run workflow (job, dry_run, month). `dry_run` is ticked by default.
 - To pause: `gh workflow disable bot.yml`, which also blocks manual runs. `gh workflow enable bot.yml` resumes.

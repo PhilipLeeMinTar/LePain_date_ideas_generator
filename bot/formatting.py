@@ -68,6 +68,10 @@ def nothing_new() -> str:
     return "🗓️ <b>Weekly update</b>: nothing new worth adding this week."
 
 
+def daily_checkin(new_events: int) -> str:
+    return f"✅ <b>Daily check</b>: ran OK. {new_events} new {'event' if new_events == 1 else 'events'} saved, no ticket alerts."
+
+
 def _usage_line(u: dict) -> str:
     used = u["ok"] + u["failed"]
     count = f"{used} of {u['limit']} used" if u["limit"] else f"{used} used, limit not known yet"
