@@ -55,17 +55,6 @@
   "summary": "Free public access pickleball courts hosted at Science Park Drive."
  },
  {
-  "title": "Are You at Risk? Free Lung Cancer Screening by 365CPS",
-  "start_date": "2026-08-20",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": "Free",
-  "category": "other",
-  "url": "https://thehoneycombers.com/singapore/event/are-you-at-risk-free-lung-cancer-screening-by-365-cancer-prevention-society/",
-  "summary": "A free community health screening for lung cancer organized by 365 Cancer Prevention Society."
- },
- {
   "title": "Endless Breakfast at Allora",
   "start_date": "2026-09-20",
   "end_date": "2026-11-29",
@@ -110,28 +99,6 @@
   "summary": "The King Koil Black Friday shopping and mattress sale event."
  },
  {
-  "title": "Warrior 24/7: The Parkinson Challenge",
-  "start_date": "2026-10-31",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "outdoors",
-  "url": "https://thehoneycombers.com/singapore/event/warrior-24-7-the-parkinson-challenge/",
-  "summary": "A sports and fitness challenge raising awareness and support for Parkinson's disease."
- },
- {
-  "title": "Sleep Easy by Castlery",
-  "start_date": "2026-11-02",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": "Castlery",
-  "price": null,
-  "category": "other",
-  "url": "https://thehoneycombers.com/singapore/event/sleep-easy-by-castlery/",
-  "summary": "A shopping and home lifestyle experience presented by Castlery."
- },
- {
   "title": "The Art of Healing Programme at TTSH: November Notes",
   "start_date": "2026-11-02",
   "end_date": "2026-11-30",
@@ -152,17 +119,6 @@
   "category": "music",
   "url": "https://thehoneycombers.com/singapore/event/sl80-weish/",
   "summary": "A live music and artistic performance showcasing Singaporean musician Weish."
- },
- {
-  "title": "Considering Matthew Shepard",
-  "start_date": "2026-11-09",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/the-chorallective-presents-considering-matthew-shepard/",
-  "summary": "A choral performance presenting the story of Matthew Shepard."
  },
  {
   "title": "Audio House 11.11 Sale",
@@ -242,39 +198,6 @@
   "summary": "A sports tournament in the Kallang Football Series."
  },
  {
-  "title": "New2U Year End Bazaar 2026",
-  "start_date": "2026-11-13",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "market",
-  "url": "https://thehoneycombers.com/singapore/event/new2u-year-end-bazaar-2026/",
-  "summary": "A charity thrift bazaar featuring pre-loved treasures."
- },
- {
-  "title": "Something Strange Festival 2026",
-  "start_date": "2026-11-13",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "festival",
-  "url": "https://thehoneycombers.com/singapore/event/something-strange-festival-2026/",
-  "summary": "An arts and culture festival celebrating the unconventional and strange."
- },
- {
-  "title": "Thrive@Libraries 2026",
-  "start_date": "2026-11-13",
-  "end_date": "2026-11-15",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/thrivelibraries-2026-permission-to-pause/",
-  "summary": "A library programme focused on wellness, reflection, and personal growth."
- },
- {
   "title": "Festive Tree Decoration: Gardens-A-Glow 2026",
   "start_date": "2026-11-14",
   "end_date": "2026-11-29",
@@ -284,39 +207,6 @@
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/festive-tree-decoration-gardens-a-glow-2026/",
   "summary": "A festive holiday celebration featuring illuminated tree displays."
- },
- {
-  "title": "Everland: The Launch Show",
-  "start_date": "2026-11-15",
-  "end_date": null,
-  "time": "7pm",
-  "venue": "Capitol Theatre",
-  "price": "From $98",
-  "category": "music",
-  "url": "https://www.sistic.com.sg/events/everland2026",
-  "summary": "Local singer-songwriter Regina Song plays her first-ever headline concert in Singapore."
- },
- {
-  "title": "Kidney Dialysis Foundation Got To Ride 2026",
-  "start_date": "2026-11-15",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "outdoors",
-  "url": "https://www.thekallang.com.sg/en/update----announcement/kidney-dialysis-foundation-got-to-ride-2026.html",
-  "summary": "A charity cycling event hosted at The Kallang."
- },
- {
-  "title": "Regina Song everland: the launch show",
-  "start_date": "2026-11-15",
-  "end_date": null,
-  "time": "7pm",
-  "venue": "Capitol Theatre",
-  "price": "$94 – $198",
-  "category": "music",
-  "url": "https://www.sistic.com.sg/events/everland2026",
-  "summary": "Local singer-songwriter Regina Song performs her headline debut concert."
  },
  {
   "title": "5 Seconds Of Summer: Everyone’s A Star! World Tour",
@@ -345,7 +235,7 @@
   "start_date": "2026-11-16",
   "end_date": "2026-12-31",
   "time": null,
-  "venue": null,
+  "venue": "Downtown East",
   "price": null,
   "category": "other",
   "url": "https://thehoneycombers.com/singapore/event/downtown-east-celebrates-christmas-with-a-sweet-line-up-of-festive-experiences-for-all-ages/",
@@ -411,7 +301,7 @@
   "start_date": "2026-11-19",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "Ce La Vi Singapore Sky Bar",
   "price": null,
   "category": "nightlife",
   "url": "https://thehoneycombers.com/singapore/event/vender-bar-takes-over-ce-la-vi-singapore-for-a-one-night-cocktail-celebration/",
@@ -429,6 +319,50 @@
   "summary": "An arts and cultural celebration installation themed around prosperity and luck."
  },
  {
+  "title": "Vender Bar takes over Woobar",
+  "start_date": "2026-11-20",
+  "end_date": "2026-11-21",
+  "time": null,
+  "venue": "Woobar",
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/vender-bar-takes-over-woobar-at-w-singapore-sentosa-cove/",
+  "summary": "Vender Bar takes over Woobar at W Singapore Sentosa Cove for signature cocktails."
+ },
+ {
+  "title": "Comedy Outing: A Proud Spaces FUNraiser",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "comedy",
+  "url": "https://thehoneycombers.com/singapore/event/comedy-outing-a-proud-spaces-funraiser/",
+  "summary": "A comedy fundraising night in support of Proud Spaces."
+ },
+ {
+  "title": "Dear Death",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/dear-death/",
+  "summary": "A workshop exploring themes around mortality."
+ },
+ {
+  "title": "Druv Kent Band: Beyond It All",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/druv-kent-band-beyond-it-all/",
+  "summary": "A live concert performance by the Druv Kent Band."
+ },
+ {
   "title": "Energy defence crystals appreciation class",
   "start_date": "2026-11-21",
   "end_date": null,
@@ -440,6 +374,28 @@
   "summary": "A crystal appreciation and energy defence workshop hosted with Sodo Atelier."
  },
  {
+  "title": "Glow Pottery with Yun The Potter at Frasers House",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": "Frasers House",
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/frasers-houses-glow-pottery-workshop-with-yun-the-potter/",
+  "summary": "A glow-in-the-dark pottery workshop led by Yun The Potter."
+ },
+ {
+  "title": "Intercell in Singapore this November",
+  "start_date": "2026-11-21",
+  "end_date": "2026-11-22",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "nightlife",
+  "url": "https://thehoneycombers.com/singapore/event/intercell-brings-amsterdams-underground-energy-to-singapore-this-november/",
+  "summary": "Amsterdam's underground electronic music event Intercell comes to Singapore."
+ },
+ {
   "title": "Joji: Solaris Tour",
   "start_date": "2026-11-21",
   "end_date": "2026-11-22",
@@ -449,6 +405,28 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_joji",
   "summary": "Critically acclaimed singer and producer Joji brings his Solaris tour to Singapore."
+ },
+ {
+  "title": "W Singapore × Zouk Sun Chasers Pool Party",
+  "start_date": "2026-11-21",
+  "end_date": null,
+  "time": null,
+  "venue": "W Singapore",
+  "price": null,
+  "category": "nightlife",
+  "url": "https://thehoneycombers.com/singapore/event/w-singapore-x-zouk-sun-chasers-pool-party/",
+  "summary": "A daytime poolside party collaboration between W Singapore and Zouk."
+ },
+ {
+  "title": "Phoenix Gastrobar Jakarta at The Kitchen Table",
+  "start_date": "2026-11-22",
+  "end_date": null,
+  "time": null,
+  "venue": "The Kitchen Table",
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/phoenix-gastrobar-jakarta-joins-sunday-brunch-at-the-kitchen-table-w-singapore-sentosa-cove/",
+  "summary": "A collaborative Sunday brunch takeover by Phoenix Gastrobar Jakarta at The Kitchen Table."
  },
  {
   "title": "Simple Plan “The Bigger Than You Think!” Tour",
@@ -482,6 +460,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_gunsnroses",
   "summary": "Rock legends Guns N’ Roses bring their world tour to Singapore's National Stadium."
+ },
+ {
+  "title": "Guppy Tank",
+  "start_date": "2026-11-26",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/guppy-tank/",
+  "summary": "An arts and culture presentation titled Guppy Tank."
  },
  {
   "title": "ECA: Merry Market",
