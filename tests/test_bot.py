@@ -480,6 +480,24 @@ def test_dropped_connection_also_uses_backup(monkeypatch):
     assert llm.model == "gemini-3.8-flash"
 
 
+def test_request_timeout_uses_backup(monkeypatch):
+    try:  # which HTTP library the SDK uses depends on its version
+        import httpx2 as httpx
+    except ImportError:
+        import httpx
+
+    llm = _scripted_llm({"gemini-flash-latest": httpx.ReadTimeout("timed out")}, monkeypatch)
+    assert llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx") == [("k1", "great")]
+    assert llm.model == "gemini-3.8-flash"
+
+
+def test_client_has_request_timeout():
+    from bot.llm import REQUEST_TIMEOUT_MS
+
+    llm = GeminiLLM("fake-key", "gemini-flash-latest", min_interval_s=0)
+    assert llm.client._api_client._http_options.timeout == REQUEST_TIMEOUT_MS
+
+
 def test_daily_quota_switches_at_once_and_learns_the_limit(monkeypatch):
     from google.genai import errors
 

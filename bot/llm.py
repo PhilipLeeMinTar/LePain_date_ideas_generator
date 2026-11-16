@@ -104,6 +104,8 @@ _SKIP_MODEL_WORDS = ("image", "tts", "live", "audio", "embedding", "vision", "ex
 
 RETRYABLE = (429, 500, 503)
 MAX_BACKUP_MODELS = 3
+# A hung request once held a run for ~13 minutes. Normal answers take well under a minute.
+REQUEST_TIMEOUT_MS = 120_000  # google-genai's HttpOptions.timeout is in milliseconds
 # Quota errors name the exhausted daily limit: ...PerDay... 'model': 'x' ... 'quotaValue': '20'
 _DAILY_QUOTA = re.compile(r"PerDay.*?'model':\s*'([^']+)'.*?'quotaValue':\s*'(\d+)'", re.DOTALL)
 
@@ -148,7 +150,12 @@ class GeminiLLM:
 
         # The SDK defaults to the stable "v1" API, which lacks aliases like gemini-flash-latest
         # and structured-output features. v1beta has both.
-        self.client = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version="v1beta"))
+        # The timeout raises a transport error, which _is_gemini_failure() treats like a dropped
+        # connection: retried, then handed to a backup model.
+        self.client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(api_version="v1beta", timeout=REQUEST_TIMEOUT_MS),
+        )
         self.model = model
         self.min_interval_s = min_interval_s  # free tier has low requests-per-minute limits
         self._last = 0.0
