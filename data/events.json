@@ -187,17 +187,6 @@
   "summary": "Festive installations and holiday activities featuring Mochiak & AhWoo across Lendlease malls."
  },
  {
-  "title": "Mizuho Blue Challenge - The Kallang Football Series",
-  "start_date": "2026-11-13",
-  "end_date": "2026-11-17",
-  "time": null,
-  "venue": "Kallang",
-  "price": null,
-  "category": "outdoors",
-  "url": "https://thehoneycombers.com/singapore/event/mizuho-blue-challenge-the-kallang-football-series-singapore/",
-  "summary": "A sports tournament in the Kallang Football Series."
- },
- {
   "title": "Festive Tree Decoration: Gardens-A-Glow 2026",
   "start_date": "2026-11-14",
   "end_date": "2026-11-29",
@@ -240,28 +229,6 @@
   "category": "other",
   "url": "https://thehoneycombers.com/singapore/event/downtown-east-celebrates-christmas-with-a-sweet-line-up-of-festive-experiences-for-all-ages/",
   "summary": "Downtown East celebrates Christmas with a lineup of festive family experiences."
- },
- {
-  "title": "Kefir making workshop (Mandarin)",
-  "start_date": "2026-11-17",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/nourishing-food-experience-kefir-making-mandarin-session/",
-  "summary": "A hands-on workshop conducted in Mandarin on making nourishing kefir."
- },
- {
-  "title": "不准讓愛壞掉！EP Launch Show",
-  "start_date": "2026-11-17",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/shelby-wang-ep-launch-show/",
-  "summary": "Shelby Wang performs live in an EP launch showcase."
  },
  {
   "title": "Improv Taster Sessions",
@@ -570,6 +537,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_qotsa",
   "summary": "Rock band Queens of the Stone Age performs a one-night-only concert in Singapore."
+ },
+ {
+  "title": "5 Seconds Of Summer: Everyone’s A Star! World Tour",
+  "start_date": "2026-12-03",
+  "end_date": null,
+  "time": "8pm",
+  "venue": "The Star Theatre",
+  "price": "From $148",
+  "category": "music",
+  "url": "https://ticketmaster.sg/activity/detail/26sg_5sos",
+  "summary": "Australian alt-rock band 5 Seconds of Summer returns to Singapore on their world tour."
  },
  {
   "title": "Gravity",
