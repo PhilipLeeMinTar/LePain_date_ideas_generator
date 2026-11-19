@@ -102,7 +102,9 @@ class ModelUnavailable(RuntimeError):
 _SKIP_MODEL_WORDS = ("image", "tts", "live", "audio", "embedding", "vision", "exp", "learnlm", "computer")
 
 
-RETRYABLE = (429, 500, 503)
+# 504 is Google giving up at our request deadline (the SDK sends REQUEST_TIMEOUT_MS as X-Server-Timeout),
+# which happens when Gemini is overloaded.
+RETRYABLE = (429, 500, 503, 504)
 MAX_BACKUP_MODELS = 3
 # A hung request once held a run for ~13 minutes. Normal answers take well under a minute.
 REQUEST_TIMEOUT_MS = 120_000  # google-genai's HttpOptions.timeout is in milliseconds
@@ -115,6 +117,11 @@ def _is_gemini_failure(e: Exception) -> bool:
     from google.genai import errors
 
     return isinstance(e, errors.APIError) or any(c.__name__ == "TransportError" for c in type(e).__mro__)
+
+
+def is_gemini_outage(e: Exception) -> bool:
+    """Gemini overloaded, timing out, out of quota or unreachable, even after retries and backup models."""
+    return _is_gemini_failure(e) and getattr(e, "code", 503) in RETRYABLE
 
 
 def rank_flash_models(names: list[str]) -> list[str]:

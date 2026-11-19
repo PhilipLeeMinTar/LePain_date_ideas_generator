@@ -608,6 +608,55 @@ def test_daily_quota_switches_at_once_and_learns_the_limit(monkeypatch):
     assert calls[0] == ("gemini-3.8-flash", False, 20)
 
 
+def test_deadline_exceeded_is_retried_then_uses_backup(monkeypatch):
+    from google.genai import errors
+
+    deadline = errors.ServerError(504, {"error": {
+        "code": 504, "message": "Deadline expired before operation could complete.", "status": "DEADLINE_EXCEEDED"}})
+    llm = _scripted_llm({"gemini-flash-latest": deadline}, monkeypatch)
+    assert llm.rank(_ONE_EVENT, "p", [], [], 5, 1, "ctx") == [("k1", "great")]
+    assert llm.client.models.used == ["gemini-flash-latest"] * 4 + ["gemini-3.8-flash"]
+
+
+def _outage():
+    from google.genai import errors
+
+    return errors.ServerError(504, {"error": {"code": 504, "message": "deadline", "status": "DEADLINE_EXCEEDED"}})
+
+
+def test_refresh_stops_early_when_gemini_is_down():
+    ctx = make_ctx(date(2026, 11, 19), {})
+    ctx.sources = [Source(n, f"https://{n}") for n in "ABCDE"]
+    calls = []
+    llm = _ExplodingLLM(_outage())
+    orig = llm.extract
+    llm.extract = lambda *a: (calls.append(a[1]), orig(*a))
+    ctx.llm = llm
+    with pytest.raises(RuntimeError, match="Gemini seems to be down"):
+        jobs.refresh(ctx, [date(2026, 11, 1)])
+    assert calls == ["A", "B"]
+    assert ctx.tg.sent == []
+
+
+def test_refresh_outage_count_resets_after_a_success_or_other_error():
+    ctx = make_ctx(date(2026, 11, 19), {})
+    ctx.sources = [Source(n, f"https://{n}") for n in "ABCDE"]
+    script = {"A": _outage(), "B": None, "C": _outage(), "D": ValueError("bad page"), "E": _outage()}
+
+    class LLM:
+        calls = []
+
+        def extract(self, page_text, source, today):
+            self.calls.append(source)
+            if script[source]:
+                raise script[source]
+            return []
+
+    ctx.llm = LLM()
+    jobs.refresh(ctx, [date(2026, 11, 1)])  # never two outages in a row, so it carries on
+    assert ctx.llm.calls == list("ABCDE")
+
+
 def test_gives_up_when_every_model_is_overloaded(monkeypatch):
     from google.genai import errors
 

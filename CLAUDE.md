@@ -53,7 +53,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
   - On a 404, or when a model stays overloaded or out of quota after retries, it calls ListModels and switches to the next best Flash model for the rest of the run (up to 3 backups).
   - Every request is counted in the `gemini_usage` table and shown by `status`. Google has no API for remaining quota, so daily limits are learned from its 429 errors. Dry-run requests aren't counted, because dry runs don't save the DB.
   - `ModelUnavailable` (404 with no fallback, or 401/403) stops the run immediately.
-  - Requests are paced at ~6s for the free tier, with retries on 429/5xx and dropped connections. An exhausted daily quota skips the retries and goes straight to a backup.
+  - Requests are paced at ~6s for the free tier, with retries on 429/500/503/504 and dropped connections. The 120s request timeout is also sent to Google as a server deadline, so a slow, overloaded Gemini answers 504 DEADLINE_EXCEEDED (seen 2026-11-19). An exhausted daily quota skips the retries and goes straight to a backup.
   - The free tier allowed 20 requests per day for `gemini-3.8-flash` when last hit. The quota day runs on Pacific time.
   - Dropped connections are matched by exception class name, because the SDK's HTTP library (`httpx2` in 3.0) varies by version.
 - `bot/telegram.py`: minimal Bot API client, send only. Never log URLs, because they contain the token.
@@ -65,6 +65,7 @@ bot/sources.py URLs → scrape.fetch → scrape.html_to_text (keeps links + JSON
 ## Failure behaviour (intentional)
 
 - If every source fails extraction, `refresh()` raises, the run fails, and GitHub emails the owner. **Never** post a misleading "nothing found" message on errors.
+- If 2 sources in a row fail because Gemini is down (5xx, 429 or dropped connection, after retries and backups), `refresh()` stops early with "Gemini seems to be down" instead of running into the 60-minute job timeout. Sources that succeeded are kept, and the next run catches up.
 - The workflow saves `data/bot.db` with `if: always()` (except on dry runs), and `_post_digest` commits after every message, so a crash never causes double posting.
 - Reactions are no longer collected (the owner's choice). Reactions already saved from the older one-event-per-message posts still feed the ranker. Combined messages store no `message_id`. New picks rely on `taste_profile.md`.
 - Dry runs work on a temp copy of the DB and print messages instead of sending them.

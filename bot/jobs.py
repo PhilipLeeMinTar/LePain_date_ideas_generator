@@ -17,7 +17,7 @@ from .dates import (
     month_label, month_start, monthly_target_month, next_month, parse_iso, weekly_target_months,
 )
 from .db import DB, Event, event_key
-from .llm import CATEGORIES, LLM, ModelUnavailable
+from .llm import CATEGORIES, LLM, ModelUnavailable, is_gemini_outage
 from .scrape import fetch, html_to_text
 from .sources import SOURCES, Source, expand
 from .telegram import Telegram
@@ -27,6 +27,10 @@ log = logging.getLogger(__name__)
 # meta keys used by the catch-up rule in auto()
 MONTHLY_DONE = "monthly_done"  # first day of the last month whose lineup went out
 WEEKLY_DONE = "weekly_done"    # date the weekly update last ran
+
+# Stop the run after this many sources in a row fail because Gemini is down. Each one can take
+# ~10 minutes of retries, so carrying on would only run into the job timeout.
+MAX_GEMINI_OUTAGE_SOURCES = 2
 
 
 @dataclass
@@ -64,7 +68,7 @@ def refresh(ctx: Ctx, months: list[date]) -> int:
     A page that is down, blocked or empty is skipped before any Gemini request is made.
     """
     new_total = 0
-    attempted = succeeded = 0
+    attempted = succeeded = outage_streak = 0
     for name, url in expand(ctx.sources, months):
         scraped_key = f"scraped:{url}"
         if ctx.db.get_meta(scraped_key) == ctx.today.isoformat():
@@ -86,8 +90,15 @@ def refresh(ctx: Ctx, months: list[date]) -> int:
             raise  # config problem: stop now instead of failing every source the same way
         except Exception as e:  # noqa: BLE001
             log.error("[%s] extraction failed: %s: %s", name, type(e).__name__, e)
+            outage_streak = outage_streak + 1 if is_gemini_outage(e) else 0
+            if outage_streak >= MAX_GEMINI_OUTAGE_SOURCES:
+                raise RuntimeError(
+                    f"Gemini seems to be down: {outage_streak} sources in a row failed after retries "
+                    "and backup models. Stopping early; tomorrow's run will catch up."
+                ) from e
             continue
         succeeded += 1
+        outage_streak = 0
         kept = new = 0
         for ev in extracted:
             ev = _clean(ev, ctx.today)
