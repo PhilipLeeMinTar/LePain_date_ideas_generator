@@ -110,17 +110,6 @@
   "summary": "An arts and culture program featuring therapeutic musical performances at Tan Tock Seng Hospital."
  },
  {
-  "title": "SL80: Weish",
-  "start_date": "2026-11-07",
-  "end_date": "2026-11-21",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/sl80-weish/",
-  "summary": "A live music and artistic performance showcasing Singaporean musician Weish."
- },
- {
   "title": "Audio House 11.11 Sale",
   "start_date": "2026-11-11",
   "end_date": "2026-11-22",
@@ -242,72 +231,6 @@
   "summary": "An arts and cultural celebration installation themed around prosperity and luck."
  },
  {
-  "title": "Vender Bar takes over Woobar",
-  "start_date": "2026-11-20",
-  "end_date": "2026-11-21",
-  "time": null,
-  "venue": "Woobar",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/vender-bar-takes-over-woobar-at-w-singapore-sentosa-cove/",
-  "summary": "Vender Bar takes over Woobar at W Singapore Sentosa Cove for signature cocktails."
- },
- {
-  "title": "Comedy Outing: A Proud Spaces FUNraiser",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "comedy",
-  "url": "https://thehoneycombers.com/singapore/event/comedy-outing-a-proud-spaces-funraiser/",
-  "summary": "A comedy fundraising night in support of Proud Spaces."
- },
- {
-  "title": "Dear Death",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/dear-death/",
-  "summary": "A workshop exploring themes around mortality."
- },
- {
-  "title": "Druv Kent Band: Beyond It All",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/druv-kent-band-beyond-it-all/",
-  "summary": "A live concert performance by the Druv Kent Band."
- },
- {
-  "title": "Energy defence crystals appreciation class",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/energy-defence-crystals-appreciation-class-with-sodo-atelier/",
-  "summary": "A crystal appreciation and energy defence workshop hosted with Sodo Atelier."
- },
- {
-  "title": "Glow Pottery with Yun The Potter at Frasers House",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": "Frasers House",
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/frasers-houses-glow-pottery-workshop-with-yun-the-potter/",
-  "summary": "A glow-in-the-dark pottery workshop led by Yun The Potter."
- },
- {
   "title": "Intercell in Singapore this November",
   "start_date": "2026-11-21",
   "end_date": "2026-11-22",
@@ -330,37 +253,15 @@
   "summary": "Critically acclaimed singer and producer Joji brings his Solaris tour to Singapore."
  },
  {
-  "title": "Learn how to become a Pilates teacher with TMA",
-  "start_date": "2026-11-21",
+  "title": "Jubilant Deepavali Concert",
+  "start_date": "2026-11-22",
   "end_date": null,
   "time": null,
   "venue": null,
   "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/balanced-body-pilates-teacher-training-open-house-2/",
-  "summary": "An open house session introducing Balanced Body Pilates teacher training."
- },
- {
-  "title": "W Singapore × Zouk Sun Chasers Pool Party",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": "W Singapore",
-  "price": null,
-  "category": "nightlife",
-  "url": "https://thehoneycombers.com/singapore/event/w-singapore-x-zouk-sun-chasers-pool-party/",
-  "summary": "A daytime poolside party collaboration between W Singapore and Zouk."
- },
- {
-  "title": "Walk for Hope 2026",
-  "start_date": "2026-11-21",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "outdoors",
-  "url": "https://thehoneycombers.com/singapore/event/walk-for-hope-2026/",
-  "summary": "A community fundraising and awareness walk."
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/jubilant-deepavali-concert/",
+  "summary": "A musical concert celebration held in honor of Deepavali."
  },
  {
   "title": "Phoenix Gastrobar Jakarta at The Kitchen Table",
@@ -385,6 +286,28 @@
   "summary": "Pop-punk band Simple Plan returns to Singapore to perform their iconic hits."
  },
  {
+  "title": "StarHub unites Singapore for 63rd Golden Horse Awards",
+  "start_date": "2026-11-22",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/starhub-brings-singapore-together-to-cheer-on-local-talent-at-the-63rd-golden-horse-awards/",
+  "summary": "A community event brought by StarHub to view and cheer on local talent at the Golden Horse Awards."
+ },
+ {
+  "title": "Full moon in Gemini healing circle 2026",
+  "start_date": "2026-11-24",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/full-moon-in-gemini-healing-circle-2026/",
+  "summary": "A wellness workshop focusing on a full moon healing circle in Gemini."
+ },
+ {
   "title": "Khalid: It’s Always Summer Somewhere Tour",
   "start_date": "2026-11-24",
   "end_date": null,
@@ -394,6 +317,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/26sg_khalid",
   "summary": "Award-winning singer-songwriter Khalid brings his live tour to The Star Theatre."
+ },
+ {
+  "title": "Ce La Vi Singapore presents E. Guigal wine dinner",
+  "start_date": "2026-11-25",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/ce-la-vi-singapore-presents-e-guigal-wine-dinner/",
+  "summary": "An exclusive wine pairing dinner hosted by Ce La Vi Singapore featuring E. Guigal."
  },
  {
   "title": "Guns N’ Roses World Tour 2026",
@@ -407,6 +341,17 @@
   "summary": "Rock legends Guns N’ Roses bring their world tour to Singapore's National Stadium."
  },
  {
+  "title": "Affordable Art Fair Singapore 2026",
+  "start_date": "2026-11-26",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/affordable-art-fair-singapore-2026/",
+  "summary": "An art fair showcasing affordable contemporary artworks."
+ },
+ {
   "title": "Guppy Tank",
   "start_date": "2026-11-26",
   "end_date": null,
@@ -416,6 +361,39 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/guppy-tank/",
   "summary": "An arts and culture presentation titled Guppy Tank."
+ },
+ {
+  "title": "The Ngee Ann National Teochew Artists’ Exhibition 2026",
+  "start_date": "2026-11-26",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/the-ngee-ann-national-teochew-artists-exhibition-2026/",
+  "summary": "An art exhibition showcasing creative works from national Teochew artists."
+ },
+ {
+  "title": "The Recovery Social at W Singapore – Sentosa Cove",
+  "start_date": "2026-11-26",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "other",
+  "url": "https://thehoneycombers.com/singapore/event/the-recovery-social-at-w-singapore-sentosa-cove/",
+  "summary": "A wellness and fitness social event at W Singapore."
+ },
+ {
+  "title": "Christmas Together 2026",
+  "start_date": "2026-11-27",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/christmas-together-2026/",
+  "summary": "A festive Christmas event bringing people together."
  },
  {
   "title": "ECA: Merry Market",
@@ -645,7 +623,7 @@
   "venue": "National Stadium",
   "price": "From $148",
   "category": "music",
-  "url": null,
+  "url": "https://thesmartlocal.com/read/upcoming-concerts-in-singapore/#Bruno_Mars_The_Romantic_Tour",
   "summary": "Bruno Mars performs four nights at the National Stadium alongside Anderson .Paak."
  },
  {
