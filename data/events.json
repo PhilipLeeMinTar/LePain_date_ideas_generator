@@ -33,28 +33,6 @@
   "summary": "A Disney-themed floral display exhibition hosted at Floral Fantasy."
  },
  {
-  "title": "Maria Taniguchi: Afterimage",
-  "start_date": "2026-07-24",
-  "end_date": "2026-11-22",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/maria-taniguchi-afterimage/",
-  "summary": "An art exhibition featuring works by contemporary artist Maria Taniguchi."
- },
- {
-  "title": "REINVENTION: ALLPLAY Free Pickleball Courts",
-  "start_date": "2026-08-11",
-  "end_date": "2026-11-22",
-  "time": "7:00 am - 7:00 pm",
-  "venue": "7 Science Park Drive, Singapore 119316",
-  "price": "Free",
-  "category": "outdoors",
-  "url": "https://thesmartlocal.com/read/geneo-free-pickleball-courts/",
-  "summary": "Free public access pickleball courts hosted at Science Park Drive."
- },
- {
   "title": "Endless Breakfast at Allora",
   "start_date": "2026-09-20",
   "end_date": "2026-11-29",
@@ -64,17 +42,6 @@
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/endless-breakfast-at-allora/",
   "summary": "An endless breakfast dining spread hosted at Allora."
- },
- {
-  "title": "Ready for Life Festival 2026",
-  "start_date": "2026-10-17",
-  "end_date": "2026-11-22",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/ready-for-life-festival-2026/",
-  "summary": "A festival featuring workshops and educational sessions aimed at life and retirement readiness."
  },
  {
   "title": "Dramatis Personae: 1001 Lives",
@@ -108,17 +75,6 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/the-art-of-healing-programme-at-tan-tock-seng-hospital-november-notes/",
   "summary": "An arts and culture program featuring therapeutic musical performances at Tan Tock Seng Hospital."
- },
- {
-  "title": "Audio House 11.11 Sale",
-  "start_date": "2026-11-11",
-  "end_date": "2026-11-22",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "market",
-  "url": "https://thehoneycombers.com/singapore/event/audio-houses-biggest-annual-11-11-sale-returns/",
-  "summary": "The annual 11.11 shopping promotional event by Audio House featuring discounted electronics."
  },
  {
   "title": "The House on the Moon 《明月共此时》by Nelson Yeo",
@@ -209,17 +165,6 @@
   "summary": "Downtown East celebrates Christmas with a lineup of festive family experiences."
  },
  {
-  "title": "Playwrights’ Cove 2026: From Page to Stage",
-  "start_date": "2026-11-19",
-  "end_date": "2026-11-22",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/the-necessary-stages-playwrights-cove-2026-from-page-to-stage/",
-  "summary": "A theatre showcase presenting new works developed under The Necessary Stage's Playwrights' Cove."
- },
- {
   "title": "River of Luck!",
   "start_date": "2026-11-20",
   "end_date": "2027-01-31",
@@ -229,72 +174,6 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/river-of-luck/",
   "summary": "An arts and cultural celebration installation themed around prosperity and luck."
- },
- {
-  "title": "Intercell in Singapore this November",
-  "start_date": "2026-11-21",
-  "end_date": "2026-11-22",
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "nightlife",
-  "url": "https://thehoneycombers.com/singapore/event/intercell-brings-amsterdams-underground-energy-to-singapore-this-november/",
-  "summary": "Amsterdam's underground electronic music event Intercell comes to Singapore."
- },
- {
-  "title": "Joji: Solaris Tour",
-  "start_date": "2026-11-21",
-  "end_date": "2026-11-22",
-  "time": "8pm",
-  "venue": "Arena @ Expo",
-  "price": "From $128",
-  "category": "music",
-  "url": "https://ticketmaster.sg/activity/detail/26sg_joji",
-  "summary": "Critically acclaimed singer and producer Joji brings his Solaris tour to Singapore."
- },
- {
-  "title": "Jubilant Deepavali Concert",
-  "start_date": "2026-11-22",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/jubilant-deepavali-concert/",
-  "summary": "A musical concert celebration held in honor of Deepavali."
- },
- {
-  "title": "Phoenix Gastrobar Jakarta at The Kitchen Table",
-  "start_date": "2026-11-22",
-  "end_date": null,
-  "time": null,
-  "venue": "The Kitchen Table",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/phoenix-gastrobar-jakarta-joins-sunday-brunch-at-the-kitchen-table-w-singapore-sentosa-cove/",
-  "summary": "A collaborative Sunday brunch takeover by Phoenix Gastrobar Jakarta at The Kitchen Table."
- },
- {
-  "title": "Simple Plan “The Bigger Than You Think!” Tour",
-  "start_date": "2026-11-22",
-  "end_date": null,
-  "time": "8pm",
-  "venue": "Singapore Indoor Stadium",
-  "price": "From $98",
-  "category": "music",
-  "url": "https://www.sistic.com.sg/events/sp1126",
-  "summary": "Pop-punk band Simple Plan returns to Singapore to perform their iconic hits."
- },
- {
-  "title": "StarHub unites Singapore for 63rd Golden Horse Awards",
-  "start_date": "2026-11-22",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/starhub-brings-singapore-together-to-cheer-on-local-talent-at-the-63rd-golden-horse-awards/",
-  "summary": "A community event brought by StarHub to view and cheer on local talent at the Golden Horse Awards."
  },
  {
   "title": "Full moon in Gemini healing circle 2026",
@@ -319,11 +198,22 @@
   "summary": "Award-winning singer-songwriter Khalid brings his live tour to The Star Theatre."
  },
  {
+  "title": "Meet Biscardo",
+  "start_date": "2026-11-24",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/meet-biscardo/",
+  "summary": "A special food and wine event featuring Biscardo."
+ },
+ {
   "title": "Ce La Vi Singapore presents E. Guigal wine dinner",
   "start_date": "2026-11-25",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "CÉ LA VI Singapore",
   "price": null,
   "category": "food",
   "url": "https://thehoneycombers.com/singapore/event/ce-la-vi-singapore-presents-e-guigal-wine-dinner/",
@@ -378,11 +268,55 @@
   "start_date": "2026-11-26",
   "end_date": null,
   "time": null,
-  "venue": null,
+  "venue": "W Singapore – Sentosa Cove",
   "price": null,
   "category": "other",
   "url": "https://thehoneycombers.com/singapore/event/the-recovery-social-at-w-singapore-sentosa-cove/",
   "summary": "A wellness and fitness social event at W Singapore."
+ },
+ {
+  "title": "A Gust of Snow",
+  "start_date": "2026-11-27",
+  "end_date": "2026-11-28",
+  "time": null,
+  "venue": "Thanying",
+  "price": null,
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/a-gust-of-snow-four-hands-dining-experience-thanying/",
+  "summary": "A four-hands dining experience taking place at Thanying."
+ },
+ {
+  "title": "Anime Festival Asia Singapore 2026",
+  "start_date": "2026-11-27",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "festival",
+  "url": "https://thehoneycombers.com/singapore/event/anime-festival-asia-singapore-2026/",
+  "summary": "Southeast Asia's premier anime and Japanese pop culture festival."
+ },
+ {
+  "title": "Bodyslam (Live in Singapore)",
+  "start_date": "2026-11-27",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/bodyslam-live-in-singapore-2026/",
+  "summary": "Thai rock band Bodyslam performs live in concert in Singapore."
+ },
+ {
+  "title": "Bumbum Solidario feat. Badsista",
+  "start_date": "2026-11-27",
+  "end_date": "2026-11-28",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "nightlife",
+  "url": "https://thehoneycombers.com/singapore/event/bumbum-solidario-ft-badsista-a-fundraiser-for-transbefrienders/",
+  "summary": "A nightlife music event and fundraiser featuring Badsista for TransBefrienders."
  },
  {
   "title": "Christmas Together 2026",
@@ -394,6 +328,17 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/christmas-together-2026/",
   "summary": "A festive Christmas event bringing people together."
+ },
+ {
+  "title": "Dom Dolla touches down in Singapore for first-ever show",
+  "start_date": "2026-11-27",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/dom-dolla-first-ever-show-in-singapore/",
+  "summary": "Electronic music producer Dom Dolla performs his first-ever show in Singapore."
  },
  {
   "title": "ECA: Merry Market",
@@ -440,6 +385,17 @@
   "summary": "K-pop group BABYMONSTER performs two nights at the Singapore Indoor Stadium."
  },
  {
+  "title": "Culture Club: Private Triad Trails tour",
+  "start_date": "2026-11-28",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/culture-club-private-triad-trails-walking-tour/",
+  "summary": "A guided walking tour exploring Singapore's heritage and historic triad trails."
+ },
+ {
   "title": "Enabling Lives Festival 2026",
   "start_date": "2026-11-28",
   "end_date": "2026-11-29",
@@ -449,6 +405,61 @@
   "category": "festival",
   "url": "https://thehoneycombers.com/singapore/event/enabling-lives-festival-2026/",
   "summary": "A community festival celebrating inclusion and enabling lives."
+ },
+ {
+  "title": "Goat Year Prosperity Talk by Master Terelyn (Mandarin)",
+  "start_date": "2026-11-28",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "other",
+  "url": "https://thehoneycombers.com/singapore/event/2027-goat-year-prosperity-talk-by-master-terelyn-mandarin-session/",
+  "summary": "A Mandarin-language seminar on prosperity and fortune for the upcoming Goat Year."
+ },
+ {
+  "title": "Hush Christmas pop-up",
+  "start_date": "2026-11-28",
+  "end_date": "2026-11-30",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "market",
+  "url": "https://thehoneycombers.com/singapore/event/hush-christmas-pop-up/",
+  "summary": "A festive pop-up event offering holiday products and experiences."
+ },
+ {
+  "title": "Kindred by The Vintage Collective",
+  "start_date": "2026-11-28",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "market",
+  "url": "https://thehoneycombers.com/singapore/event/kindred-a-community-market-by-the-vintage-collective/",
+  "summary": "A festive community market by The Vintage Collective."
+ },
+ {
+  "title": "Soif de Nuit",
+  "start_date": "2026-11-28",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "nightlife",
+  "url": "https://thehoneycombers.com/singapore/event/soif-de-nuit-a-wine-house-music-affair-after-dark/",
+  "summary": "An after-dark event combining wine and house music."
+ },
+ {
+  "title": "Run For Hope 2026",
+  "start_date": "2026-11-29",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "outdoors",
+  "url": "https://thehoneycombers.com/singapore/event/run-for-hope-2026/",
+  "summary": "An annual charity run supporting cancer research awareness."
  },
  {
   "title": "Dan & Phil Hard Launch World Tour",
@@ -548,6 +559,17 @@
   "category": "music",
   "url": "https://ibighit.com/en/bts/tour/",
   "summary": "Global sensation BTS stages their comeback world tour with four concerts in Singapore."
+ },
+ {
+  "title": "The Story of Studio Ghibli",
+  "start_date": "2026-12-18",
+  "end_date": "2027-07-04",
+  "time": "10:00 am - 7:00 pm",
+  "venue": "211 Marina Way, Singapore 018977",
+  "price": null,
+  "category": "arts",
+  "url": "https://thesmartlocal.com/read/the-story-of-studio-ghibli-singapore/",
+  "summary": "An exhibition exploring the iconic works and history of Studio Ghibli."
  },
  {
   "title": "Slowdive Live in Singapore",
