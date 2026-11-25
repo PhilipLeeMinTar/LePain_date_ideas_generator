@@ -176,39 +176,6 @@
   "summary": "An arts and cultural celebration installation themed around prosperity and luck."
  },
  {
-  "title": "Full moon in Gemini healing circle 2026",
-  "start_date": "2026-11-24",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "workshop",
-  "url": "https://thehoneycombers.com/singapore/event/full-moon-in-gemini-healing-circle-2026/",
-  "summary": "A wellness workshop focusing on a full moon healing circle in Gemini."
- },
- {
-  "title": "Khalid: It’s Always Summer Somewhere Tour",
-  "start_date": "2026-11-24",
-  "end_date": null,
-  "time": "8pm",
-  "venue": "The Star Theatre",
-  "price": "From $128",
-  "category": "music",
-  "url": "https://ticketmaster.sg/activity/detail/26sg_khalid",
-  "summary": "Award-winning singer-songwriter Khalid brings his live tour to The Star Theatre."
- },
- {
-  "title": "Meet Biscardo",
-  "start_date": "2026-11-24",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/meet-biscardo/",
-  "summary": "A special food and wine event featuring Biscardo."
- },
- {
   "title": "Ce La Vi Singapore presents E. Guigal wine dinner",
   "start_date": "2026-11-25",
   "end_date": null,
@@ -262,6 +229,17 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/the-ngee-ann-national-teochew-artists-exhibition-2026/",
   "summary": "An art exhibition showcasing creative works from national Teochew artists."
+ },
+ {
+  "title": "The Nutcracker by State Ballet of Georgia",
+  "start_date": "2026-11-26",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/the-nutcracker-by-state-ballet-of-georgia/",
+  "summary": "A classic ballet performance of The Nutcracker by the State Ballet of Georgia."
  },
  {
   "title": "The Recovery Social at W Singapore – Sentosa Cove",
@@ -438,6 +416,28 @@
   "category": "market",
   "url": "https://thehoneycombers.com/singapore/event/kindred-a-community-market-by-the-vintage-collective/",
   "summary": "A festive community market by The Vintage Collective."
+ },
+ {
+  "title": "Meetup at Library: Compost & Common Ground",
+  "start_date": "2026-11-28",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/meetup-at-library-compost-common-ground/",
+  "summary": "A community library meetup discussing composting and sustainability."
+ },
+ {
+  "title": "Singapore’s first World Minnan Cultural Festival",
+  "start_date": "2026-11-28",
+  "end_date": "2026-11-29",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "festival",
+  "url": "https://thehoneycombers.com/singapore/event/singapores-first-world-minnan-cultural-festival/",
+  "summary": "A cultural festival showcasing traditional Minnan heritage and artistic performances."
  },
  {
   "title": "Soif de Nuit",
