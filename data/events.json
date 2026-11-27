@@ -187,15 +187,15 @@
   "summary": "An art fair showcasing affordable contemporary artworks."
  },
  {
-  "title": "Guppy Tank",
+  "title": "F*nkytown pop-up at Santi's",
   "start_date": "2026-11-26",
-  "end_date": null,
+  "end_date": "2026-11-27",
   "time": null,
-  "venue": null,
+  "venue": "Santi's",
   "price": null,
-  "category": "arts",
-  "url": "https://thehoneycombers.com/singapore/event/guppy-tank/",
-  "summary": "An arts and culture presentation titled Guppy Tank."
+  "category": "food",
+  "url": "https://thehoneycombers.com/singapore/event/fnkytown-pop-up-at-santis/",
+  "summary": "A special food and drink pop-up event hosted at Santi's."
  },
  {
   "title": "The Ngee Ann National Teochew Artists’ Exhibition 2026",
@@ -218,17 +218,6 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/the-nutcracker-by-state-ballet-of-georgia/",
   "summary": "A classic ballet performance of The Nutcracker by the State Ballet of Georgia."
- },
- {
-  "title": "The Recovery Social at W Singapore – Sentosa Cove",
-  "start_date": "2026-11-26",
-  "end_date": null,
-  "time": null,
-  "venue": "W Singapore – Sentosa Cove",
-  "price": null,
-  "category": "other",
-  "url": "https://thehoneycombers.com/singapore/event/the-recovery-social-at-w-singapore-sentosa-cove/",
-  "summary": "A wellness and fitness social event at W Singapore."
  },
  {
   "title": "A Gust of Snow",
@@ -592,6 +581,17 @@
   "category": "music",
   "url": "https://ticketmaster.sg/activity/detail/27sg_maroon5",
   "summary": "American pop-rock band Maroon 5 performs their classic chart-toppers at the National Stadium."
+ },
+ {
+  "title": "Damien Rice ‘O’ 25th Anniversary Tour",
+  "start_date": "2027-02-16",
+  "end_date": "2027-02-17",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "music",
+  "url": "https://thehoneycombers.com/singapore/event/damien-rice-anniversary-tour/",
+  "summary": "Damien Rice performs live in Singapore for his 'O' 25th Anniversary Tour."
  },
  {
   "title": "Yoasobi 10-City Dome & Stadium Tour 2026-2027 超惑星 “Super Planet”",
