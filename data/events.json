@@ -187,17 +187,6 @@
   "summary": "An art fair showcasing affordable contemporary artworks."
  },
  {
-  "title": "F*nkytown pop-up at Santi's",
-  "start_date": "2026-11-26",
-  "end_date": "2026-11-27",
-  "time": null,
-  "venue": "Santi's",
-  "price": null,
-  "category": "food",
-  "url": "https://thehoneycombers.com/singapore/event/fnkytown-pop-up-at-santis/",
-  "summary": "A special food and drink pop-up event hosted at Santi's."
- },
- {
   "title": "The Ngee Ann National Teochew Artists’ Exhibition 2026",
   "start_date": "2026-11-26",
   "end_date": "2026-11-29",
@@ -242,17 +231,6 @@
   "summary": "Southeast Asia's premier anime and Japanese pop culture festival."
  },
  {
-  "title": "Bodyslam (Live in Singapore)",
-  "start_date": "2026-11-27",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/bodyslam-live-in-singapore-2026/",
-  "summary": "Thai rock band Bodyslam performs live in concert in Singapore."
- },
- {
   "title": "Bumbum Solidario feat. Badsista",
   "start_date": "2026-11-27",
   "end_date": "2026-11-28",
@@ -273,17 +251,6 @@
   "category": "arts",
   "url": "https://thehoneycombers.com/singapore/event/christmas-together-2026/",
   "summary": "A festive Christmas event bringing people together."
- },
- {
-  "title": "Dom Dolla touches down in Singapore for first-ever show",
-  "start_date": "2026-11-27",
-  "end_date": null,
-  "time": null,
-  "venue": null,
-  "price": null,
-  "category": "music",
-  "url": "https://thehoneycombers.com/singapore/event/dom-dolla-first-ever-show-in-singapore/",
-  "summary": "Electronic music producer Dom Dolla performs his first-ever show in Singapore."
  },
  {
   "title": "ECA: Merry Market",
@@ -429,6 +396,17 @@
   "summary": "An annual charity run supporting cancer research awareness."
  },
  {
+  "title": "Camp Lit 2026",
+  "start_date": "2026-12-01",
+  "end_date": "2026-12-03",
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/camp-lit-2026-sing-lit-pop-hunters/",
+  "summary": "A literary camp and workshop exploring Sing Lit pop culture."
+ },
+ {
   "title": "Dan & Phil Hard Launch World Tour",
   "start_date": "2026-12-01",
   "end_date": null,
@@ -438,6 +416,28 @@
   "category": "comedy",
   "url": "https://www.sistic.com.sg/events/dp1226",
   "summary": "YouTubers Dan and Phil present a live stage show featuring skits, music, and interactive segments."
+ },
+ {
+  "title": "Two Nations One Voice",
+  "start_date": "2026-12-01",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "arts",
+  "url": "https://thehoneycombers.com/singapore/event/two-nations-one-voice/",
+  "summary": "A cultural vocal performance uniting two nations."
+ },
+ {
+  "title": "Improv Taster Sessions",
+  "start_date": "2026-12-02",
+  "end_date": null,
+  "time": null,
+  "venue": null,
+  "price": null,
+  "category": "workshop",
+  "url": "https://thehoneycombers.com/singapore/event/improv-taster-sessions-4/",
+  "summary": "An introductory workshop session on improvisational comedy."
  },
  {
   "title": "You’ll see Queens of the Stone Age World Tour",
